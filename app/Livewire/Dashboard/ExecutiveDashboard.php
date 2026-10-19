@@ -300,7 +300,7 @@ class ExecutiveDashboard extends Component
                     'phone'      => $c->phone,
                     'tier'       => $c->tier,
                     'days_ago'   => $c->last_order_date
-                        ? (int) $c->last_order_date->diffInDays(now())
+                        ? (int) floor($c->last_order_date->diffInDays(now()))
                         : null,
                     'deposit_kg' => (float) $c->deposit_kg,
                 ];

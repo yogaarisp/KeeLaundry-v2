@@ -111,9 +111,9 @@
                     </td>
                     <td class="px-4 py-3 text-center text-xs">
                         @if ($c->last_order_date)
-                            @php $days = $c->last_order_date->diffInDays(now()); @endphp
+                            @php $days = $c->days_since_last_order ?? 0; @endphp
                             <span @class(['badge text-[10px]', 'badge-rose' => $days > 30, 'badge-amber' => $days > 14 && $days <= 30, 'badge-green' => $days <= 14])>
-                                {{ $days }}h lalu
+                                {{ $c->last_order_human }}
                             </span>
                         @else
                             <span class="badge badge-slate text-[10px]">Baru</span>
@@ -169,7 +169,7 @@
                         <p class="text-xs text-emerald-600 font-semibold">💰 {{ $c->deposit_kg }} Kg deposit</p>
                     @endif
                 </div>
-                @if ($c->last_order_date && $c->last_order_date->diffInDays(now()) > 14)
+                @if ($c->is_churn)
                     <span class="badge badge-rose text-[10px] shrink-0">Pasif</span>
                 @endif
             </div>
@@ -216,8 +216,8 @@
             <p class="text-xs text-slate-400 mt-0.5">{{ $c->phone }}</p>
             <p class="text-xs mt-1">
                 @if ($c->last_order_date)
-                    @php $days = $c->last_order_date->diffInDays(now()); @endphp
-                    <span @class(['badge text-[10px]', 'badge-rose' => $days > 30, 'badge-amber' => $days <= 30])>{{ $days }} hari lalu</span>
+                    @php $days = $c->days_since_last_order ?? 0; @endphp
+                    <span @class(['badge text-[10px]', 'badge-rose' => $days > 30, 'badge-amber' => $days <= 30])>{{ $c->last_order_human }}</span>
                 @else
                     <span class="badge badge-slate text-[10px]">Belum pernah order</span>
                 @endif

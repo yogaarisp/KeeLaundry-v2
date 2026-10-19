@@ -61,8 +61,30 @@ class Customer extends Model
     public function getDaysSinceLastOrderAttribute(): ?int
     {
         return $this->last_order_date
-            ? (int) $this->last_order_date->diffInDays(now())
+            ? (int) floor($this->last_order_date->diffInDays(now()))
             : null;
+    }
+
+    /**
+     * Teks ramah untuk tampilan terakhir order (misal: "Hari ini", "Kemarin", "3 hari lalu").
+     */
+    public function getLastOrderHumanAttribute(): string
+    {
+        if (! $this->last_order_date) {
+            return 'Belum pernah';
+        }
+
+        $days = (int) floor($this->last_order_date->diffInDays(now()));
+
+        if ($days <= 0) {
+            return 'Hari ini';
+        }
+
+        if ($days === 1) {
+            return 'Kemarin';
+        }
+
+        return "{$days} hari lalu";
     }
 
     /**
@@ -71,6 +93,6 @@ class Customer extends Model
     public function getIsChurnAttribute(): bool
     {
         return $this->last_order_date === null
-            || $this->last_order_date->diffInDays(now()) > 14;
+            || (int) floor($this->last_order_date->diffInDays(now())) > 14;
     }
 }
