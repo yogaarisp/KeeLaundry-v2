@@ -26,6 +26,7 @@ class CustomerCrud extends Component
     public string  $name         = '';
     public string  $phone        = '';
     public string  $address      = '';
+    public string  $maps_url     = '';
     public string  $tier         = 'REGULAR';
     public string  $preferences  = '';
 
@@ -146,6 +147,7 @@ class CustomerCrud extends Component
         $this->name        = $c->name;
         $this->phone       = $c->phone;
         $this->address     = $c->address ?? '';
+        $this->maps_url    = $c->maps_url ?? '';
         $this->tier        = $c->tier;
         $this->preferences = $c->preferences ?? '';
         $this->showForm    = true;
@@ -154,11 +156,12 @@ class CustomerCrud extends Component
     public function saveCustomer(): void
     {
         $rules = [
-            'name'    => ['required', 'string', 'min:2', 'max:100'],
-            'phone'   => ['required', 'string', 'min:8', 'max:20',
-                          Rule::unique('customers', 'phone')->ignore($this->editingId)->whereNull('deleted_at')],
-            'address' => ['nullable', 'string', 'max:255'],
-            'tier'    => ['required', Rule::in(['REGULAR', 'SILVER', 'VIP'])],
+            'name'     => ['required', 'string', 'min:2', 'max:100'],
+            'phone'    => ['required', 'string', 'min:8', 'max:20',
+                           Rule::unique('customers', 'phone')->ignore($this->editingId)->whereNull('deleted_at')],
+            'address'  => ['nullable', 'string', 'max:255'],
+            'maps_url' => ['nullable', 'string', 'max:500'],
+            'tier'     => ['required', Rule::in(['REGULAR', 'SILVER', 'VIP'])],
         ];
 
         $this->validate($rules, [], ['name' => 'Nama', 'phone' => 'Nomor HP']);
@@ -168,6 +171,7 @@ class CustomerCrud extends Component
                 'name'        => trim($this->name),
                 'phone'       => trim($this->phone),
                 'address'     => trim($this->address) ?: null,
+                'maps_url'    => trim($this->maps_url) ?: null,
                 'tier'        => $this->tier,
                 'preferences' => trim($this->preferences) ?: null,
             ];
@@ -354,6 +358,7 @@ class CustomerCrud extends Component
         $this->name        = '';
         $this->phone       = '';
         $this->address     = '';
+        $this->maps_url    = '';
         $this->tier        = 'REGULAR';
         $this->preferences = '';
         $this->resetValidation();

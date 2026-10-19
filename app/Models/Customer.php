@@ -17,6 +17,7 @@ class Customer extends Model
         'name',
         'phone',
         'address',
+        'maps_url',
         'tier',
         'deposit_kg',
         'loyalty_points',

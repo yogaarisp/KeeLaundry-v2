@@ -491,7 +491,14 @@
             @endif
             @if ($dc->address)
             <div class="rounded-xl bg-slate-50 border border-slate-200 p-3">
-                <p class="text-xs font-bold text-slate-500 mb-1">📍 Alamat</p>
+                <div class="flex items-center justify-between mb-1">
+                    <p class="text-xs font-bold text-slate-500">📍 Alamat Jemput</p>
+                    <a href="{{ $dc->maps_url ?: ('https://www.google.com/maps/search/?api=1&query=' . urlencode($dc->address)) }}"
+                       target="_blank"
+                       class="text-[11px] text-sky-600 hover:text-sky-700 font-semibold inline-flex items-center gap-1 hover:underline">
+                        <span>Buka Google Maps ➔</span>
+                    </a>
+                </div>
                 <p class="text-sm text-slate-700">{{ $dc->address }}</p>
             </div>
             @endif
