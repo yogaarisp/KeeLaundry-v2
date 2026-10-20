@@ -4,15 +4,15 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
             <h2 class="text-xl sm:text-2xl font-bold text-slate-800">Antar Jemput Laundry</h2>
-            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Manajemen penjemputan cucian kotor dan pengantaran cucian bersih kurir</p>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Kelola penjemputan cucian kotor dan pengantaran cucian bersih</p>
         </div>
         <div class="flex items-center gap-2">
             <button wire:click="openCreate('JEMPUT')" class="btn-secondary text-xs sm:text-sm">
-                <span>🛵</span>
+                <svg class="size-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 <span>Jadwal Jemput</span>
             </button>
             <button wire:click="openCreate('ANTAR')" class="btn-primary text-xs sm:text-sm">
-                <span>📦</span>
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                 <span>Jadwal Antar</span>
             </button>
         </div>
@@ -21,59 +21,59 @@
     {{-- ══ METRIC STATS CARDS ═════════════════════════════════════════════ --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {{-- Jemput Menunggu --}}
-        <div class="card p-3.5 sm:p-4 border-l-4 border-l-amber-500">
+        <div class="card p-4">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-500">Jemput Menunggu</span>
-                <span class="p-1.5 rounded-lg bg-amber-50 text-amber-600 text-sm">🛵</span>
+                <span class="text-xs font-medium text-slate-500">Jemput Menunggu</span>
+                <span class="size-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-sm">🛵</span>
             </div>
-            <p class="text-2xl font-extrabold text-slate-800 mt-2">{{ $this->counts['jemput_pending'] }}</p>
-            <p class="text-[11px] text-amber-600 font-medium mt-0.5">Siap diambil kurir</p>
+            <p class="text-2xl font-bold text-slate-800 mt-2">{{ $this->counts['jemput_pending'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Siap diambil kurir</p>
         </div>
 
         {{-- Antar Menunggu --}}
-        <div class="card p-3.5 sm:p-4 border-l-4 border-l-sky-500">
+        <div class="card p-4">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-500">Antar Menunggu</span>
-                <span class="p-1.5 rounded-lg bg-sky-50 text-sky-600 text-sm">📦</span>
+                <span class="text-xs font-medium text-slate-500">Antar Menunggu</span>
+                <span class="size-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-sm">📦</span>
             </div>
-            <p class="text-2xl font-extrabold text-slate-800 mt-2">{{ $this->counts['antar_pending'] }}</p>
-            <p class="text-[11px] text-sky-600 font-medium mt-0.5">Cucian bersih siap antar</p>
+            <p class="text-2xl font-bold text-slate-800 mt-2">{{ $this->counts['antar_pending'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Cucian bersih siap antar</p>
         </div>
 
         {{-- Jadwal Hari Ini --}}
-        <div class="card p-3.5 sm:p-4 border-l-4 border-l-indigo-500">
+        <div class="card p-4">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-500">Jadwal Hari Ini</span>
-                <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 text-sm">📅</span>
+                <span class="text-xs font-medium text-slate-500">Jadwal Hari Ini</span>
+                <span class="size-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-sm">📅</span>
             </div>
-            <p class="text-2xl font-extrabold text-slate-800 mt-2">{{ $this->counts['today_total'] }}</p>
-            <p class="text-[11px] text-indigo-600 font-medium mt-0.5">Total tugas hari ini</p>
+            <p class="text-2xl font-bold text-slate-800 mt-2">{{ $this->counts['today_total'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Total tugas hari ini</p>
         </div>
 
         {{-- Selesai --}}
-        <div class="card p-3.5 sm:p-4 border-l-4 border-l-emerald-500">
+        <div class="card p-4">
             <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-slate-500">Telah Selesai</span>
-                <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 text-sm">✅</span>
+                <span class="text-xs font-medium text-slate-500">Telah Selesai</span>
+                <span class="size-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-sm">✓</span>
             </div>
-            <p class="text-2xl font-extrabold text-slate-800 mt-2">{{ $this->counts['completed'] }}</p>
-            <p class="text-[11px] text-emerald-600 font-medium mt-0.5">Riwayat antar/jemput sukses</p>
+            <p class="text-2xl font-bold text-slate-800 mt-2">{{ $this->counts['completed'] }}</p>
+            <p class="text-[11px] text-slate-400 mt-0.5">Riwayat antar/jemput selesai</p>
         </div>
     </div>
 
     {{-- ══ TABS & FILTERS ═════════════════════════════════════════════════ --}}
-    <div class="card p-3 sm:p-4 space-y-3">
-        {{-- Navigation Tabs --}}
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none border-b border-slate-100">
+    <div class="space-y-3">
+        {{-- Navigation Tabs: Minimal Segmented Control --}}
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit max-w-full overflow-x-auto scrollbar-none">
             <button wire:click="setTab('jemput')"
                     @class([
-                        'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2',
-                        'bg-amber-500 text-white shadow-sm' => $activeTab === 'jemput',
-                        'text-slate-600 hover:bg-slate-100' => $activeTab !== 'jemput',
+                        'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2',
+                        'bg-white text-slate-800 shadow-sm font-semibold' => $activeTab === 'jemput',
+                        'text-slate-600 hover:text-slate-900' => $activeTab !== 'jemput',
                     ])>
-                <span>🛵 Jemput Kotor</span>
+                <span>Jemput Kotor</span>
                 @if ($this->counts['jemput_pending'] > 0)
-                    <span class="size-5 rounded-full text-[11px] flex items-center justify-center font-bold {{ $activeTab === 'jemput' ? 'bg-white text-amber-600' : 'bg-amber-100 text-amber-700' }}">
+                    <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-slate-200/80 text-slate-700">
                         {{ $this->counts['jemput_pending'] }}
                     </span>
                 @endif
@@ -81,13 +81,13 @@
 
             <button wire:click="setTab('antar')"
                     @class([
-                        'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-2',
-                        'bg-sky-600 text-white shadow-sm' => $activeTab === 'antar',
-                        'text-slate-600 hover:bg-slate-100' => $activeTab !== 'antar',
+                        'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2',
+                        'bg-white text-slate-800 shadow-sm font-semibold' => $activeTab === 'antar',
+                        'text-slate-600 hover:text-slate-900' => $activeTab !== 'antar',
                     ])>
-                <span>📦 Antar Bersih</span>
+                <span>Antar Bersih</span>
                 @if ($this->counts['antar_pending'] > 0)
-                    <span class="size-5 rounded-full text-[11px] flex items-center justify-center font-bold {{ $activeTab === 'antar' ? 'bg-white text-sky-600' : 'bg-sky-100 text-sky-700' }}">
+                    <span class="px-1.5 py-0.2 rounded-full text-[11px] font-bold bg-slate-200/80 text-slate-700">
                         {{ $this->counts['antar_pending'] }}
                     </span>
                 @endif
@@ -95,101 +95,109 @@
 
             <button wire:click="setTab('semua')"
                     @class([
-                        'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all',
-                        'bg-slate-800 text-white shadow-sm' => $activeTab === 'semua',
-                        'text-slate-600 hover:bg-slate-100' => $activeTab !== 'semua',
+                        'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all',
+                        'bg-white text-slate-800 shadow-sm font-semibold' => $activeTab === 'semua',
+                        'text-slate-600 hover:text-slate-900' => $activeTab !== 'semua',
                     ])>
                 Semua Tugas
             </button>
 
             <button wire:click="setTab('riwayat')"
                     @class([
-                        'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all',
-                        'bg-slate-800 text-white shadow-sm' => $activeTab === 'riwayat',
-                        'text-slate-600 hover:bg-slate-100' => $activeTab !== 'riwayat',
+                        'px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all',
+                        'bg-white text-slate-800 shadow-sm font-semibold' => $activeTab === 'riwayat',
+                        'text-slate-600 hover:text-slate-900' => $activeTab !== 'riwayat',
                     ])>
                 Riwayat Selesai
             </button>
         </div>
 
         {{-- Filters row --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-1">
-            {{-- Search box --}}
-            <div class="relative">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
-                <input type="search"
-                       wire:model.live.debounce.300ms="search"
-                       placeholder="Cari pelanggan, telp, alamat..."
-                       class="form-input pl-9 text-xs sm:text-sm">
+        <div class="card p-3 sm:p-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                {{-- Search box --}}
+                <div class="relative">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+                    <input type="search"
+                           wire:model.live.debounce.300ms="search"
+                           placeholder="Cari pelanggan, telp, alamat..."
+                           class="form-input pl-9 text-xs sm:text-sm">
+                </div>
+
+                {{-- Date Filter --}}
+                <select wire:model.live="filterDate" class="form-input text-xs sm:text-sm">
+                    <option value="all">Semua Tanggal</option>
+                    <option value="today">Hari Ini ({{ today()->format('d M') }})</option>
+                    <option value="tomorrow">Besok ({{ today()->addDay()->format('d M') }})</option>
+                </select>
+
+                {{-- Courier Filter --}}
+                <select wire:model.live="filterCourier" class="form-input text-xs sm:text-sm">
+                    <option value="">Semua Kurir</option>
+                    @foreach ($this->couriers as $courier)
+                        <option value="{{ $courier->id }}">{{ $courier->name }}</option>
+                    @endforeach
+                </select>
+
+                {{-- Status Filter --}}
+                <select wire:model.live="filterStatus" class="form-input text-xs sm:text-sm">
+                    <option value="">Semua Status</option>
+                    <option value="MENUNGGU">Menunggu</option>
+                    <option value="DIPROSES">Diproses / Jalan</option>
+                    <option value="SELESAI">Selesai</option>
+                    <option value="BATAL">Batal</option>
+                </select>
             </div>
-
-            {{-- Date Filter --}}
-            <select wire:model.live="filterDate" class="form-input text-xs sm:text-sm">
-                <option value="all">Semua Tanggal</option>
-                <option value="today">Hari Ini ({{ today()->format('d M') }})</option>
-                <option value="tomorrow">Besok ({{ today()->addDay()->format('d M') }})</option>
-            </select>
-
-            {{-- Courier Filter --}}
-            <select wire:model.live="filterCourier" class="form-input text-xs sm:text-sm">
-                <option value="">Semua Kurir</option>
-                @foreach ($this->couriers as $courier)
-                    <option value="{{ $courier->id }}">{{ $courier->name }}</option>
-                @endforeach
-            </select>
-
-            {{-- Status Filter --}}
-            <select wire:model.live="filterStatus" class="form-input text-xs sm:text-sm">
-                <option value="">Semua Status</option>
-                <option value="MENUNGGU">Menunggu</option>
-                <option value="DIPROSES">Diproses / Jalan</option>
-                <option value="SELESAI">Selesai</option>
-                <option value="BATAL">Batal</option>
-            </select>
         </div>
     </div>
 
     {{-- ══ TASK CARDS LIST ════════════════════════════════════════════════ --}}
     <div class="space-y-3">
         @forelse ($tasks as $task)
-            <div class="card p-4 sm:p-5 transition-shadow hover:shadow-md border-l-4 {{ $task->task_type === 'JEMPUT' ? 'border-l-amber-500' : 'border-l-sky-500' }}">
+            <div class="card p-4 sm:p-5 hover:border-slate-300 transition-colors">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     {{-- Left side info --}}
-                    <div class="space-y-2 flex-1 min-w-0">
+                    <div class="space-y-2.5 flex-1 min-w-0">
                         {{-- Badges row --}}
                         <div class="flex items-center gap-2 flex-wrap">
                             @if ($task->task_type === 'JEMPUT')
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                                    <span>🛵</span> Jemput Cucian
+                                <span class="badge badge-slate text-xs font-semibold">
+                                    🛵 Jemput Kotor
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800">
-                                    <span>📦</span> Antar Bersih
+                                <span class="badge badge-sky text-xs font-semibold">
+                                    📦 Antar Bersih
                                 </span>
                             @endif
 
                             {{-- Status Badge --}}
-                            @php
-                                $statusBadge = match($task->status) {
-                                    'MENUNGGU' => 'bg-amber-50 text-amber-700 border border-amber-200',
-                                    'DIPROSES' => 'bg-blue-50 text-blue-700 border border-blue-200 animate-pulse',
-                                    'SELESAI'  => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-                                    'BATAL'    => 'bg-rose-50 text-rose-700 border border-rose-200',
-                                    default    => 'bg-slate-100 text-slate-700',
-                                };
-                            @endphp
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $statusBadge }}">
-                                {{ $task->status === 'DIPROSES' ? '🛵 Sedang Jalan' : $task->status }}
-                            </span>
+                            @if ($task->status === 'MENUNGGU')
+                                <span class="badge badge-amber text-xs">
+                                    Menunggu
+                                </span>
+                            @elseif ($task->status === 'DIPROSES')
+                                <span class="badge badge-sky text-xs">
+                                    <span class="size-1.5 rounded-full bg-sky-500 animate-pulse inline-block"></span>
+                                    Sedang Jalan
+                                </span>
+                            @elseif ($task->status === 'SELESAI')
+                                <span class="badge badge-green text-xs">
+                                    ✓ Selesai
+                                </span>
+                            @else
+                                <span class="badge badge-slate text-xs">
+                                    Dibatalkan
+                                </span>
+                            @endif
 
                             {{-- Time Slot & Date --}}
-                            <span class="text-xs text-slate-500 flex items-center gap-1">
+                            <span class="text-xs text-slate-400 flex items-center gap-1">
                                 <svg class="size-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                                 {{ $task->scheduled_date->format('d M Y') }} • {{ $task->time_slot }}
                             </span>
 
                             @if ($task->order)
-                                <a href="/pos" class="text-xs font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-100 hover:underline">
+                                <a href="/pos" class="badge badge-slate text-xs font-mono hover:text-sky-600 transition-colors">
                                     Nota #{{ $task->order->invoice_number }}
                                 </a>
                             @endif
@@ -197,39 +205,39 @@
 
                         {{-- Customer Name & Phone --}}
                         <div class="flex items-center gap-2">
-                            <h4 class="text-base font-bold text-slate-900">{{ $task->customer_name }}</h4>
-                            <span class="text-xs text-slate-500 font-medium">({{ $task->customer_phone }})</span>
+                            <h4 class="text-base font-semibold text-slate-900">{{ $task->customer_name }}</h4>
+                            <span class="text-xs text-slate-400">({{ $task->customer_phone }})</span>
                         </div>
 
                         {{-- Address --}}
-                        <div class="flex items-start gap-2 text-xs sm:text-sm text-slate-600">
-                            <svg class="size-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
+                        <div class="flex items-start gap-1.5 text-xs sm:text-sm text-slate-600">
+                            <svg class="size-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
                             <span class="leading-relaxed">{{ $task->address }}</span>
                         </div>
 
                         {{-- Notes or Extra --}}
                         @if ($task->notes || $task->estimated_kg || $task->delivery_fee > 0)
-                            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 pt-1">
+                            <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-0.5">
                                 @if ($task->estimated_kg)
-                                    <span class="bg-slate-100 px-2 py-0.5 rounded font-medium">⚖️ Est. {{ $task->estimated_kg }} Kg</span>
+                                    <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">Est. {{ $task->estimated_kg }} Kg</span>
                                 @endif
                                 @if ($task->delivery_fee > 0)
-                                    <span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-medium">💰 Ongkir: Rp {{ number_format($task->delivery_fee) }}</span>
+                                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">Ongkir: Rp {{ number_format($task->delivery_fee) }}</span>
                                 @endif
                                 @if ($task->notes)
-                                    <span class="italic text-slate-600">💬 "{{ $task->notes }}"</span>
+                                    <span class="text-slate-500">"{{ $task->notes }}"</span>
                                 @endif
                             </div>
                         @endif
                     </div>
 
                     {{-- Right side: Courier Allocation & Quick Action Buttons --}}
-                    <div class="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                    <div class="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end gap-2 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
                         {{-- Courier Assign selector --}}
                         <div class="flex items-center gap-1.5 w-full sm:w-auto">
                             <span class="text-xs text-slate-400 whitespace-nowrap">Kurir:</span>
                             <select wire:change="assignCourier({{ $task->id }}, $event.target.value ?: null)"
-                                    class="form-input py-1 text-xs w-full sm:w-40">
+                                    class="form-input py-1 text-xs w-full sm:w-40 bg-slate-50/50">
                                 <option value="">-- Belum Ditugaskan --</option>
                                 @foreach ($this->couriers as $courier)
                                     <option value="{{ $courier->id }}" @selected($task->courier_id === $courier->id)>
@@ -246,47 +254,47 @@
                             </select>
                         </div>
 
-                        {{-- Communication & Navigation quick buttons --}}
-                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        {{-- Navigation, WhatsApp, Status & Edit Actions --}}
+                        <div class="flex items-center gap-1.5 w-full sm:w-auto justify-end">
+                            {{-- Google Maps button --}}
                             <a href="{{ $this->getMapsLink($task) }}"
                                target="_blank"
                                title="Buka rute Google Maps"
-                               class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 text-xs font-semibold shadow-sm transition-colors">
-                                <svg class="size-3.5 text-rose-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                               class="btn-secondary text-xs py-1.5 px-2.5">
+                                <svg class="size-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/></svg>
                                 <span>Peta</span>
                             </a>
 
+                            {{-- WhatsApp button --}}
                             <a href="{{ $this->getWaLink($task) }}"
                                target="_blank"
-                               title="Kirim pesan konfirmasi WhatsApp"
-                               class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm transition-colors">
-                                <svg class="size-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                               title="Kirim pesan WhatsApp"
+                               class="btn-secondary text-xs py-1.5 px-2.5 hover:text-emerald-700">
+                                <svg class="size-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
                                 <span>WA</span>
                             </a>
-                        </div>
 
-                        {{-- Status Pipeline Action Button --}}
-                        <div class="flex items-center gap-1.5 w-full justify-end pt-1">
+                            {{-- Pipeline Action Button --}}
                             @if ($task->status === 'MENUNGGU')
                                 <button wire:click="updateStatus({{ $task->id }}, 'DIPROSES')"
-                                        class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold shadow-sm transition-all">
-                                    <span>🚀 Mulai Jalan</span>
+                                        class="btn-primary text-xs py-1.5 px-3">
+                                    <span>Mulai Jalan</span>
                                 </button>
                             @elseif ($task->status === 'DIPROSES')
                                 <button wire:click="updateStatus({{ $task->id }}, 'SELESAI')"
-                                        class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all">
-                                    <span>✅ Selesai</span>
+                                        class="btn-primary text-xs py-1.5 px-3">
+                                    <span>Selesai</span>
                                 </button>
                             @endif
 
                             {{-- Edit button --}}
                             <button wire:click="openEdit({{ $task->id }})"
                                     title="Edit tugas"
-                                    class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-sky-600 hover:bg-slate-50 transition-colors">
+                                    class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors">
                                 <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
                             </button>
 
-                            {{-- More options dropdown / Cancel / Delete --}}
+                            {{-- Cancel button --}}
                             @if ($task->status !== 'BATAL' && $task->status !== 'SELESAI')
                                 <button wire:click="updateStatus({{ $task->id }}, 'BATAL')"
                                         title="Batalkan tugas"
@@ -295,6 +303,7 @@
                                 </button>
                             @endif
 
+                            {{-- Delete button --}}
                             <button wire:click="confirmDelete({{ $task->id }})"
                                     title="Hapus data"
                                     class="p-1.5 rounded-lg border border-slate-200 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-colors">

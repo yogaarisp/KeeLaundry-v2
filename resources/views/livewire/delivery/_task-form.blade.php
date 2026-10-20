@@ -14,25 +14,25 @@
     {{-- Type Selection: Jemput vs Antar --}}
     <div>
         <label class="form-label mb-1.5">Jenis Layanan</label>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl">
             <button type="button"
                     wire:click="$set('taskType', 'JEMPUT')"
                     @class([
-                        'flex items-center justify-center gap-2 p-3 rounded-xl border text-sm font-semibold transition-all',
-                        'bg-amber-500/10 border-amber-500 text-amber-700 shadow-sm' => $taskType === 'JEMPUT',
-                        'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100' => $taskType !== 'JEMPUT',
+                        'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-medium transition-all',
+                        'bg-white text-slate-900 font-semibold shadow-xs' => $taskType === 'JEMPUT',
+                        'text-slate-600 hover:text-slate-900' => $taskType !== 'JEMPUT',
                     ])>
-                <span class="text-base">🛵</span>
+                <span>🛵</span>
                 <span>Jemput Cucian</span>
             </button>
             <button type="button"
                     wire:click="$set('taskType', 'ANTAR')"
                     @class([
-                        'flex items-center justify-center gap-2 p-3 rounded-xl border text-sm font-semibold transition-all',
-                        'bg-sky-500/10 border-sky-500 text-sky-700 shadow-sm' => $taskType === 'ANTAR',
-                        'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100' => $taskType !== 'ANTAR',
+                        'flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs sm:text-sm font-medium transition-all',
+                        'bg-white text-slate-900 font-semibold shadow-xs' => $taskType === 'ANTAR',
+                        'text-slate-600 hover:text-slate-900' => $taskType !== 'ANTAR',
                     ])>
-                <span class="text-base">📦</span>
+                <span>📦</span>
                 <span>Antar Bersih</span>
             </button>
         </div>
