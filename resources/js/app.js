@@ -1,7 +1,8 @@
 import './bootstrap';
+import Chart from 'chart.js/auto';
 
-// Alpine.js is bundled with Livewire 4 — no separate import needed.
-// Chart.js is loaded via CDN in the dashboard view (wire:ignore block).
+// Expose Chart globally so Alpine.js and Blade components can use it
+window.Chart = Chart;
 
 // ── Global utilities ───────────────────────────────────────────
 

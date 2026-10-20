@@ -463,12 +463,6 @@
 {{-- ══════════════════════════════════════════════════════════════
      Alpine.js + Chart.js inline
 ══════════════════════════════════════════════════════════════════ --}}
-@once
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-@endpush
-@endonce
-
 <script>
 function executiveDashboard(chartData) {
     return {
@@ -477,8 +471,17 @@ function executiveDashboard(chartData) {
         data: chartData,
 
         initChart() {
+            if (typeof Chart === 'undefined') {
+                setTimeout(() => this.initChart(), 50);
+                return;
+            }
+
             const ctx = document.getElementById('omzetChart');
             if (!ctx) return;
+
+            if (this.chart) {
+                this.chart.destroy();
+            }
 
             Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
 
