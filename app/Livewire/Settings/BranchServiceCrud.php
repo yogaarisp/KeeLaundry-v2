@@ -80,9 +80,13 @@ class BranchServiceCrud extends Component
 
     // ─── Open / Close Modal ──────────────────────────────────────
 
-    public function openCreate(): void
+    public function openCreate(?string $defaultCategory = null): void
     {
         $this->resetForm();
+        if ($defaultCategory && in_array($defaultCategory, ['KILOAN', 'SATUAN', 'EXPRESS'])) {
+            $this->category = $defaultCategory;
+            $this->updatedCategory();
+        }
         $this->showForm = true;
     }
 
