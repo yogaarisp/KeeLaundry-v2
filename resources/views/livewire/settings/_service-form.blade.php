@@ -103,8 +103,8 @@
     {{-- Status toggle --}}
     <div class="flex items-center justify-between py-2">
         <div>
-            <p class="text-sm font-semibold text-slate-700">Layanan Aktif</p>
-            <p class="text-xs text-slate-400">Tampil di POS Kasir</p>
+            <p class="text-sm font-semibold text-slate-700">Auto-Approve (Langsung Aktif)</p>
+            <p class="text-xs text-slate-400">Otomatis disetujui &amp; langsung muncul di Kasir POS</p>
         </div>
         <button type="button" wire:click="$toggle('is_active')"
             @class([

@@ -13,10 +13,12 @@ use Livewire\Component;
 class BranchServiceCrud extends Component
 {
     // ─── UI State ──────────────────────────────────────────────
-    public bool   $showForm    = false;
-    public bool   $confirmVoid = false;
-    public string $search      = '';
-    public string $filterCat   = '';
+    public bool   $showForm          = false;
+    public bool   $showCategoryModal = false;
+    public string $inspectCategory   = 'KILOAN';
+    public bool   $confirmVoid       = false;
+    public string $search            = '';
+    public string $filterCat         = '';
 
     // ─── Form Fields ────────────────────────────────────────────
     public ?int    $editingId        = null;
@@ -42,6 +44,16 @@ class BranchServiceCrud extends Component
             ->when($this->search, fn ($q) => $q->where('name', 'like', "%{$this->search}%"))
             ->when($this->filterCat, fn ($q) => $q->where('category', $this->filterCat))
             ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+    }
+
+    #[Computed]
+    public function inspectedPackages(): Collection
+    {
+        return ServicePackage::withTrashed()
+            ->where('category', $this->inspectCategory)
+            ->orderBy('is_active', 'desc')
             ->orderBy('name')
             ->get();
     }
@@ -78,15 +90,53 @@ class BranchServiceCrud extends Component
         ];
     }
 
-    // ─── Open / Close Modal ──────────────────────────────────────
+    // ─── Category Inspect Modal ──────────────────────────────────
 
-    public function openCreate(?string $defaultCategory = null): void
+    public function openCategoryInspect(string $category): void
+    {
+        $this->inspectCategory = strtoupper($category);
+        $this->showCategoryModal = true;
+    }
+
+    public function closeCategoryInspect(): void
+    {
+        $this->showCategoryModal = false;
+    }
+
+    public function createForCategory(string $category): void
     {
         $this->resetForm();
-        if ($defaultCategory && in_array($defaultCategory, ['KILOAN', 'SATUAN', 'EXPRESS'])) {
-            $this->category = $defaultCategory;
-            $this->updatedCategory();
-        }
+        $this->category = strtoupper($category);
+        $this->unit = match ($this->category) {
+            'SATUAN' => 'Pcs',
+            default  => 'Kg',
+        };
+        $this->is_active = true;
+        $this->showCategoryModal = false;
+        $this->showForm = true;
+    }
+
+    public function autoApproveCategory(string $category): void
+    {
+        $category = strtoupper($category);
+        $count = ServicePackage::where('category', $category)
+            ->where('is_active', false)
+            ->update(['is_active' => true]);
+
+        unset($this->packages, $this->categoryStats, $this->inspectedPackages);
+
+        $this->dispatch('notify', [
+            'type'    => 'success',
+            'title'   => 'Auto-Approve Berhasil',
+            'message' => "Semua paket {$category} otomatis di-approve & aktif di kasir POS ({$count} paket diaktifkan).",
+        ]);
+    }
+
+    // ─── Open / Close Modal Form ─────────────────────────────────
+
+    public function openCreate(): void
+    {
+        $this->resetForm();
         $this->showForm = true;
     }
 
@@ -103,6 +153,8 @@ class BranchServiceCrud extends Component
         $this->softener_ml     = (float) $pkg->softener_ml_per_unit;
         $this->perfume_ml      = (float) $pkg->perfume_ml_per_unit;
         $this->is_active       = (bool) $pkg->is_active;
+
+        $this->showCategoryModal = false;
         $this->showForm        = true;
     }
 
@@ -136,28 +188,29 @@ class BranchServiceCrud extends Component
                 $msg = "Layanan «{$this->name}» berhasil diperbarui.";
             } else {
                 ServicePackage::create($data);
-                $msg = "Layanan «{$this->name}» berhasil ditambahkan.";
+                $msg = "Layanan «{$this->name}» berhasil ditambahkan dan langsung aktif.";
             }
 
             $this->dispatch('notify', ['type' => 'success', 'title' => 'Tersimpan', 'message' => $msg]);
         });
 
         $this->closeForm();
-        unset($this->packages, $this->categoryStats);
+        unset($this->packages, $this->categoryStats, $this->inspectedPackages);
     }
 
     public function toggleActive(int $id): void
     {
         $pkg = ServicePackage::withTrashed()->findOrFail($id);
         $pkg->update(['is_active' => ! $pkg->is_active]);
-        $status = $pkg->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        $status = $pkg->is_active ? 'diaktifkan (Auto-Approved)' : 'dinonaktifkan';
         $this->dispatch('notify', ['type' => 'info', 'title' => 'Status Diubah', 'message' => "Layanan «{$pkg->name}» {$status}."]);
-        unset($this->packages);
+        unset($this->packages, $this->categoryStats, $this->inspectedPackages);
     }
 
     public function confirmDelete(int $id): void
     {
         $this->deletingId = $id;
+        $this->showCategoryModal = false;
         $this->confirmVoid = true;
     }
 
@@ -183,14 +236,14 @@ class BranchServiceCrud extends Component
         $this->dispatch('notify', ['type' => 'success', 'title' => 'Dihapus', 'message' => "Layanan «{$name}» berhasil dihapus."]);
         $this->confirmVoid = false;
         $this->deletingId  = null;
-        unset($this->packages, $this->categoryStats);
+        unset($this->packages, $this->categoryStats, $this->inspectedPackages);
     }
 
     public function restorePackage(int $id): void
     {
         ServicePackage::withTrashed()->findOrFail($id)->restore();
         $this->dispatch('notify', ['type' => 'success', 'title' => 'Dipulihkan', 'message' => 'Layanan berhasil dipulihkan dari sampah.']);
-        unset($this->packages, $this->categoryStats);
+        unset($this->packages, $this->categoryStats, $this->inspectedPackages);
     }
 
     // ─── Helpers ─────────────────────────────────────────────────
