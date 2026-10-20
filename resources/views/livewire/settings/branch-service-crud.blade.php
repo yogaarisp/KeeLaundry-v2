@@ -1,10 +1,30 @@
-<div x-data="{ showForm: @entangle('showForm'), showCategoryModal: @entangle('showCategoryModal'), confirmVoid: @entangle('confirmVoid') }" class="space-y-5">
+<div x-data="{
+    showForm: @entangle('showForm'),
+    showCategoryModal: @entangle('showCategoryModal'),
+    confirmVoid: @entangle('confirmVoid'),
+    showAllTable: false,
+    lockScroll(lock) {
+        if (lock) {
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
+        } else {
+            document.body.style.overflow = '';
+            document.body.style.touchAction = '';
+        }
+    }
+}"
+x-init="
+    $watch('showCategoryModal', v => lockScroll(v || showForm || confirmVoid));
+    $watch('showForm', v => lockScroll(v || showCategoryModal || confirmVoid));
+    $watch('confirmVoid', v => lockScroll(v || showCategoryModal || showForm));
+"
+class="space-y-5">
 
 {{-- ══ HEADER ══════════════════════════════════════════════════════ --}}
 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
     <div>
         <h2 class="text-lg font-bold text-slate-800">Master Layanan &amp; Resep BOM</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Kelola paket layanan, takaran sabun, &amp; klik kategori untuk inspeksi cepat</p>
+        <p class="text-xs text-slate-400 mt-0.5">Klik kartu kategori untuk inspeksi paket, atur harga, &amp; auto-approve kasir POS</p>
     </div>
     <div class="flex items-center gap-2 sm:ml-auto">
         {{-- Search --}}
@@ -16,7 +36,7 @@
         </div>
         {{-- Category filter --}}
         <select wire:model.live="filterCat" class="form-input py-2 text-sm w-auto">
-            <option value="">Semua</option>
+            <option value="">Semua Kategori</option>
             <option value="KILOAN">Kiloan</option>
             <option value="SATUAN">Satuan</option>
             <option value="EXPRESS">Express</option>
@@ -29,23 +49,23 @@
     </div>
 </div>
 
-{{-- ══ CATEGORY STATS (CLICKABLE CARDS) ═════════════════════════════ --}}
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+{{-- ══ CATEGORY CARDS (CLICK TO OPEN INSPECT MODAL) ═════════════════ --}}
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
     @php
         $catMeta = [
-            'KILOAN'  => ['badge-sky',   '🧺', 'Kiloan Cuci Komplit / Kering'],
-            'SATUAN'  => ['badge-cyan',  '👔', 'Satuan Kemeja, Jas, Bedcover'],
-            'EXPRESS' => ['badge-amber', '⚡', 'Layanan Kilat 3 - 6 Jam'],
+            'KILOAN'  => ['badge-sky',   '🧺', 'Kiloan Cuci Komplit, Kering, Setrika'],
+            'SATUAN'  => ['badge-cyan',  '👔', 'Satuan Kemeja, Jas, Bedcover, Karpet'],
+            'EXPRESS' => ['badge-amber', '⚡', 'Layanan Kilat Selesai 3 - 8 Jam'],
         ];
     @endphp
     @foreach ($catMeta as $cat => [$badgeCls, $icon, $desc])
         @php $stat = $this->categoryStats[$cat] ?? ['total' => 0, 'active' => 0]; @endphp
         <button type="button"
                 wire:click="openCategoryInspect('{{ $cat }}')"
-                class="card p-4 text-left transition-all hover:border-sky-300 hover:shadow-md group focus:outline-none focus:ring-2 focus:ring-sky-500/20">
+                class="card p-4 sm:p-5 text-left transition-all hover:border-sky-300 hover:shadow-md group focus:outline-none focus:ring-2 focus:ring-sky-500/20">
             <div class="flex items-start justify-between">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-2xl group-hover:scale-110 transition-transform">{{ $icon }}</span>
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl group-hover:scale-110 transition-transform">{{ $icon }}</span>
                     <div>
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-wide group-hover:text-sky-700 transition-colors">{{ $cat }}</p>
                         <p class="text-2xl font-bold text-slate-800 mt-0.5">{{ $stat['total'] ?? 0 }} <span class="text-xs font-normal text-slate-400">paket</span></p>
@@ -53,150 +73,172 @@
                 </div>
                 <span class="badge {{ $badgeCls }}">{{ $stat['active'] ?? 0 }} aktif</span>
             </div>
-            <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+            <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
                 <span class="truncate">{{ $desc }}</span>
-                <span class="text-sky-600 font-semibold group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5 shrink-0 ml-1">
-                    Inspeksi
-                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+                <span class="text-sky-600 font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1 shrink-0 ml-1">
+                    <span>Buka Paket</span>
+                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                 </span>
             </div>
         </button>
     @endforeach
 </div>
 
-{{-- ══ TABLE (Desktop) ══════════════════════════════════════════════ --}}
-<div class="card hidden md:block overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-            <thead class="bg-slate-50/80 border-b border-slate-200/80">
-                <tr>
-                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Layanan</th>
-                    <th class="text-left px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Kategori</th>
-                    <th class="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Harga / Unit</th>
-                    <th class="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Estimasi</th>
-                    <th class="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">BOM (ml/unit)</th>
-                    <th class="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wide">Status</th>
-                    <th class="px-4 py-3"></th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($this->packages as $pkg)
-                <tr @class(['hover:bg-slate-50/60 transition-colors', 'opacity-50' => $pkg->trashed()])>
-                    <td class="px-4 py-3">
-                        <p class="font-semibold text-slate-800">{{ $pkg->name }}</p>
-                        <p class="text-xs text-slate-400">{{ $pkg->unit }}</p>
-                    </td>
-                    <td class="px-4 py-3">
-                        @php $catClass = match($pkg->category) {
-                            'KILOAN'  => 'badge-sky',
-                            'EXPRESS' => 'badge-amber',
-                            default   => 'badge-cyan',
-                        }; @endphp
-                        <span class="badge {{ $catClass }}">{{ $pkg->category }}</span>
-                    </td>
-                    <td class="px-4 py-3 text-right font-semibold text-slate-800 tabular-nums">
-                        Rp {{ number_format($pkg->price_per_unit) }}
-                        <span class="font-normal text-slate-400 text-xs">/ {{ $pkg->unit }}</span>
-                    </td>
-                    <td class="px-4 py-3 text-center text-sm text-slate-600">{{ $pkg->estimated_hours }} jam</td>
-                    <td class="px-4 py-3">
-                        <div class="flex items-center justify-center gap-2 text-xs">
-                            <span class="badge badge-sky" title="Deterjen">D {{ $pkg->detergent_ml_per_unit }}ml</span>
-                            <span class="badge badge-slate" title="Softener">S {{ $pkg->softener_ml_per_unit }}ml</span>
-                            <span class="badge" style="background:#f5f3ff;color:#5b21b6;box-shadow:0 0 0 1px #ddd6fe" title="Parfum">P {{ $pkg->perfume_ml_per_unit }}ml</span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-center">
-                        @if ($pkg->trashed())
-                            <span class="badge badge-rose">Dihapus</span>
-                        @elseif ($pkg->is_active)
-                            <span class="badge badge-green">Aktif</span>
-                        @else
-                            <span class="badge badge-slate">Nonaktif</span>
-                        @endif
-                    </td>
-                    <td class="px-4 py-3">
-                        <div class="flex items-center justify-end gap-1">
-                            @if ($pkg->trashed())
-                                <button wire:click="restorePackage({{ $pkg->id }})" class="btn-secondary text-xs py-1 px-2.5">Pulihkan</button>
-                            @else
-                                <button wire:click="openEdit({{ $pkg->id }})" class="btn-icon" title="Edit">
-                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
-                                </button>
-                                <button wire:click="toggleActive({{ $pkg->id }})" class="btn-icon" title="{{ $pkg->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                    @if ($pkg->is_active)
-                                        <svg class="size-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
-                                    @else
-                                        <svg class="size-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                                    @endif
-                                </button>
-                                <button wire:click="confirmDelete({{ $pkg->id }})" class="btn-icon" title="Hapus">
-                                    <svg class="size-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
-                                </button>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr><td colspan="7" class="px-4 py-12 text-center text-slate-400">
-                    <p class="text-2xl mb-2">🧴</p>
-                    <p class="font-medium">Belum ada layanan</p>
-                    <p class="text-xs mt-1">Klik "Tambah Layanan" untuk mulai</p>
-                </td></tr>
-                @endforelse
-            </tbody>
-        </table>
+{{-- ══ OPTIONAL SEARCH RESULTS OR ALL-SERVICES TOGGLE ═══════════════ --}}
+@if ($search !== '' || $filterCat !== '')
+    {{-- Search results heading --}}
+    <div class="flex items-center justify-between pt-2">
+        <p class="text-xs font-semibold text-slate-500">
+            Hasil Pencarian: <span class="text-slate-800 font-bold">"{{ $search ?: $filterCat }}"</span> ({{ $this->packages->count() }} layanan)
+        </p>
+        <button wire:click="$set('search', ''); $wire.set('filterCat', '')" class="text-xs text-sky-600 hover:underline">
+            Reset Pencarian
+        </button>
     </div>
-</div>
 
-{{-- ══ CARD LIST (Mobile) ═══════════════════════════════════════════ --}}
-<div class="md:hidden space-y-3">
-    @forelse ($this->packages as $pkg)
-    <div @class(['card p-4 space-y-3', 'opacity-60' => $pkg->trashed()])>
-        <div class="flex items-start justify-between gap-2">
-            <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-800 truncate">{{ $pkg->name }}</p>
-                <p class="text-xs text-slate-400 mt-0.5">{{ $pkg->estimated_hours }} jam · {{ $pkg->unit }}</p>
+    {{-- Desktop Table for Search Results --}}
+    <div class="card hidden md:block overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50/80 border-b border-slate-200/80 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+                    <tr>
+                        <th class="text-left px-4 py-3">Layanan</th>
+                        <th class="text-left px-4 py-3">Kategori</th>
+                        <th class="text-right px-4 py-3">Harga / Unit</th>
+                        <th class="text-center px-4 py-3">Estimasi</th>
+                        <th class="text-center px-4 py-3">BOM (ml/unit)</th>
+                        <th class="text-center px-4 py-3">Status</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white">
+                    @forelse ($this->packages as $pkg)
+                        <tr @class(['hover:bg-slate-50/60 transition-colors', 'opacity-50' => $pkg->trashed()])>
+                            <td class="px-4 py-3">
+                                <p class="font-semibold text-slate-800">{{ $pkg->name }}</p>
+                                <p class="text-xs text-slate-400">{{ $pkg->unit }}</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                @php $catClass = match($pkg->category) {
+                                    'KILOAN'  => 'badge-sky',
+                                    'EXPRESS' => 'badge-amber',
+                                    default   => 'badge-cyan',
+                                }; @endphp
+                                <span class="badge {{ $catClass }}">{{ $pkg->category }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-right font-semibold text-slate-800 tabular-nums">
+                                Rp {{ number_format($pkg->price_per_unit) }}
+                                <span class="font-normal text-slate-400 text-xs">/ {{ $pkg->unit }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-center text-sm text-slate-600">{{ $pkg->estimated_hours }} jam</td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-center gap-1.5 text-xs">
+                                    <span class="badge badge-sky" title="Deterjen">D {{ $pkg->detergent_ml_per_unit }}ml</span>
+                                    <span class="badge badge-slate" title="Softener">S {{ $pkg->softener_ml_per_unit }}ml</span>
+                                    <span class="badge" style="background:#f5f3ff;color:#5b21b6;box-shadow:0 0 0 1px #ddd6fe" title="Parfum">P {{ $pkg->perfume_ml_per_unit }}ml</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                @if ($pkg->trashed())
+                                    <span class="badge badge-rose text-xs">Dihapus</span>
+                                @elseif ($pkg->is_active)
+                                    <span class="badge badge-green text-xs">Aktif</span>
+                                @else
+                                    <span class="badge badge-slate text-xs">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex items-center justify-end gap-1">
+                                    @if ($pkg->trashed())
+                                        <button wire:click="restorePackage({{ $pkg->id }})" class="btn-secondary text-xs py-1 px-2.5">Pulihkan</button>
+                                    @else
+                                        <button wire:click="openEdit({{ $pkg->id }})" class="btn-icon" title="Edit">
+                                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+                                        </button>
+                                        <button wire:click="toggleActive({{ $pkg->id }})" class="btn-icon" title="{{ $pkg->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                            @if ($pkg->is_active)
+                                                <svg class="size-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"/></svg>
+                                            @else
+                                                <svg class="size-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+                                            @endif
+                                        </button>
+                                        <button wire:click="confirmDelete({{ $pkg->id }})" class="btn-icon" title="Hapus">
+                                            <svg class="size-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/></svg>
+                                        </button>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="px-4 py-10 text-center text-slate-400">
+                            Tidak ada layanan yang cocok dengan kata kunci pencarian.
+                        </td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- Mobile Card List for Search Results --}}
+    <div class="md:hidden space-y-3">
+        @forelse ($this->packages as $pkg)
+            <div @class(['card p-4 space-y-3', 'opacity-60' => $pkg->trashed()])>
+                <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-slate-800 truncate">{{ $pkg->name }}</p>
+                        <p class="text-xs text-slate-400 mt-0.5">{{ $pkg->estimated_hours }} jam · {{ $pkg->unit }}</p>
+                    </div>
+                    @php $catClass = match($pkg->category) { 'KILOAN' => 'badge-sky', 'EXPRESS' => 'badge-amber', default => 'badge-cyan' }; @endphp
+                    <span class="badge {{ $catClass }} shrink-0">{{ $pkg->category }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <p class="text-base font-bold text-sky-700 tabular-nums">Rp {{ number_format($pkg->price_per_unit) }}<span class="text-xs font-normal text-slate-400">/{{ $pkg->unit }}</span></p>
+                    @if ($pkg->trashed()) <span class="badge badge-rose">Dihapus</span>
+                    @elseif ($pkg->is_active) <span class="badge badge-green">Aktif</span>
+                    @else <span class="badge badge-slate">Nonaktif</span> @endif
+                </div>
+                <div class="flex gap-2 pt-1 border-t border-slate-100">
+                    @if ($pkg->trashed())
+                        <button wire:click="restorePackage({{ $pkg->id }})" class="btn-secondary text-xs py-1.5 flex-1">Pulihkan</button>
+                    @else
+                        <button wire:click="openEdit({{ $pkg->id }})" class="btn-secondary text-xs py-1.5 flex-1">Edit</button>
+                        <button wire:click="toggleActive({{ $pkg->id }})" class="btn-secondary text-xs py-1.5 flex-1">{{ $pkg->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
+                    @endif
+                </div>
             </div>
-            @php $catClass = match($pkg->category) { 'KILOAN' => 'badge-sky', 'EXPRESS' => 'badge-amber', default => 'badge-cyan' }; @endphp
-            <span class="badge {{ $catClass }} shrink-0">{{ $pkg->category }}</span>
-        </div>
-        <div class="flex items-center justify-between">
-            <p class="text-lg font-bold text-sky-600 tabular-nums">Rp {{ number_format($pkg->price_per_unit) }}<span class="text-xs font-normal text-slate-400">/{{ $pkg->unit }}</span></p>
-            @if ($pkg->trashed()) <span class="badge badge-rose">Dihapus</span>
-            @elseif ($pkg->is_active) <span class="badge badge-green">Aktif</span>
-            @else <span class="badge badge-slate">Nonaktif</span> @endif
-        </div>
-        <div class="flex gap-1.5 flex-wrap text-xs">
-            <span class="badge badge-sky">D {{ $pkg->detergent_ml_per_unit }}ml</span>
-            <span class="badge badge-slate">S {{ $pkg->softener_ml_per_unit }}ml</span>
-            <span class="badge" style="background:#f5f3ff;color:#5b21b6;box-shadow:0 0 0 1px #ddd6fe">P {{ $pkg->perfume_ml_per_unit }}ml</span>
-        </div>
-        <div class="flex gap-2 pt-1 border-t border-slate-100">
-            @if ($pkg->trashed())
-                <button wire:click="restorePackage({{ $pkg->id }})" class="btn-secondary text-xs py-1.5 flex-1">Pulihkan</button>
-            @else
-                <button wire:click="openEdit({{ $pkg->id }})" class="btn-secondary text-xs py-1.5 flex-1">Edit</button>
-                <button wire:click="toggleActive({{ $pkg->id }})" class="btn-secondary text-xs py-1.5 flex-1">{{ $pkg->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button>
-                <button wire:click="confirmDelete({{ $pkg->id }})" class="btn-danger text-xs py-1.5 px-3">Hapus</button>
-            @endif
+        @empty
+            <div class="card p-8 text-center text-slate-400">
+                Tidak ada layanan yang sesuai.
+            </div>
+        @endforelse
+    </div>
+@else
+    {{-- Clean placeholder guidance when no search query is active --}}
+    <div class="card p-6 sm:p-8 text-center border-dashed border-2 border-slate-200/80 bg-white/60">
+        <div class="max-w-md mx-auto space-y-2">
+            <div class="size-10 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center mx-auto text-xl">
+                ✨
+            </div>
+            <h4 class="font-bold text-slate-800 text-sm sm:text-base">Tampilan Bersih &amp; Terorganisir</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+                Klik salah satu kartu kategori di atas (<strong class="text-slate-600">Kiloan</strong>, <strong class="text-slate-600">Satuan</strong>, atau <strong class="text-slate-600">Express</strong>) untuk menginspeksi rincian paket, mengedit harga, dan mengelola auto-approve POS.
+            </p>
         </div>
     </div>
-    @empty
-    <div class="card p-12 text-center text-slate-400">
-        <p class="text-3xl mb-2">🧴</p>
-        <p class="font-medium">Belum ada layanan</p>
-    </div>
-    @endforelse
-</div>
+@endif
 
 {{-- ══ CATEGORY INSPECT MODAL (POPUP DESKTOP & BOTTOM-SHEET MOBILE) ══ --}}
 <div x-show="showCategoryModal" x-cloak style="display:none">
-    {{-- Overlay --}}
-    <div class="bottom-sheet-overlay md:hidden" @click="showCategoryModal = false; $wire.closeCategoryInspect()"></div>
-    <div class="dialog-overlay hidden md:flex" @click.self="showCategoryModal = false; $wire.closeCategoryInspect()"></div>
+    {{-- Mobile Overlay with @touchmove.prevent so background cannot scroll --}}
+    <div class="bottom-sheet-overlay md:hidden"
+         @click="showCategoryModal = false; $wire.closeCategoryInspect()"
+         @touchmove.prevent></div>
 
-    {{-- Mobile: Bottom Sheet --}}
+    {{-- Desktop Overlay --}}
+    <div class="dialog-overlay hidden md:flex"
+         @click.self="showCategoryModal = false; $wire.closeCategoryInspect()"></div>
+
+    {{-- Mobile: Slide-Up Bottom Sheet --}}
     <div x-show="showCategoryModal"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="translate-y-full"
@@ -204,12 +246,13 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="translate-y-0"
          x-transition:leave-end="translate-y-full"
-         class="bottom-sheet md:hidden">
+         class="bottom-sheet md:hidden overscroll-contain"
+         @touchmove.stop>
         <div class="bottom-sheet-handle"></div>
         @include('livewire.settings._category-inspect-modal')
     </div>
 
-    {{-- Desktop: Centered Dialog Popup --}}
+    {{-- Desktop: Centered Dialog Popup Modal --}}
     <div x-show="showCategoryModal"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 scale-95"
@@ -218,7 +261,7 @@
          x-transition:leave-start="opacity-100 scale-100"
          x-transition:leave-end="opacity-0 scale-95"
          class="hidden md:flex fixed inset-0 z-50 items-center justify-center p-4 pointer-events-none">
-        <div class="pointer-events-auto w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div class="pointer-events-auto w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
             @include('livewire.settings._category-inspect-modal')
         </div>
     </div>
@@ -226,9 +269,14 @@
 
 {{-- ══ FORM MODAL: CREATE / EDIT SERVICE ════════════════════════════ --}}
 <div x-show="showForm" x-cloak style="display:none">
-    {{-- Overlay --}}
-    <div class="bottom-sheet-overlay md:hidden" @click="showForm = false; $wire.closeForm()"></div>
-    <div class="dialog-overlay hidden md:flex" @click.self="showForm = false; $wire.closeForm()"></div>
+    {{-- Mobile Overlay with @touchmove.prevent --}}
+    <div class="bottom-sheet-overlay md:hidden"
+         @click="showForm = false; $wire.closeForm()"
+         @touchmove.prevent></div>
+
+    {{-- Desktop Overlay --}}
+    <div class="dialog-overlay hidden md:flex"
+         @click.self="showForm = false; $wire.closeForm()"></div>
 
     {{-- Mobile: Bottom Sheet --}}
     <div x-show="showForm"
@@ -238,7 +286,8 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="translate-y-0"
          x-transition:leave-end="translate-y-full"
-         class="bottom-sheet md:hidden">
+         class="bottom-sheet md:hidden overscroll-contain"
+         @touchmove.stop>
         <div class="bottom-sheet-handle"></div>
         @include('livewire.settings._service-form')
     </div>
@@ -260,7 +309,7 @@
 
 {{-- ══ DELETE CONFIRM ═══════════════════════════════════════════════ --}}
 <div x-show="confirmVoid" x-cloak style="display:none">
-    <div class="dialog-overlay">
+    <div class="dialog-overlay" @touchmove.prevent>
         <div x-show="confirmVoid"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 scale-95"

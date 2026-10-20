@@ -234,6 +234,8 @@
         box-shadow: 0 -8px 32px rgba(0,0,0,.12);
         max-height: 92dvh;
         overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
         padding-bottom: env(safe-area-inset-bottom, 1rem);
     }
     .bottom-sheet-handle {
