@@ -6,6 +6,20 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name', 'Kee Laundry') }}</title>
 
+    @php
+        $activeBranch = \App\Models\Branch::find(session('active_branch_id', 1)) ?? \App\Models\Branch::first();
+        $brandName = $activeBranch?->name ?? 'Kee Laundry';
+        $brandLogo = $activeBranch?->logo_url;
+        $brandFavicon = $activeBranch?->favicon_url;
+    @endphp
+
+    @if($brandFavicon)
+        <link rel="icon" href="{{ $brandFavicon }}">
+        <link rel="apple-touch-icon" href="{{ $brandFavicon }}">
+    @else
+        <link rel="icon" href="/favicon.ico">
+    @endif
+
     {{-- Google Font: Plus Jakarta Sans --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,16 +46,22 @@
 >
     {{-- Logo --}}
     <div class="flex items-center gap-3 px-4 h-16 border-b border-slate-200/80 shrink-0">
-        <div class="shrink-0 flex items-center justify-center size-9 rounded-xl bg-sky-600 text-white shadow-sm">
-            <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 9.5a3.5 3.5 0 1 0 4.95 4.95"/>
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 6h.01M7 9h.01"/>
-            </svg>
-        </div>
+        @if($brandLogo)
+            <div class="shrink-0 flex items-center justify-center size-9 rounded-xl bg-white border border-slate-200/80 p-0.5 shadow-sm overflow-hidden">
+                <img src="{{ $brandLogo }}" alt="{{ $brandName }}" class="size-full object-contain rounded-lg">
+            </div>
+        @else
+            <div class="shrink-0 flex items-center justify-center size-9 rounded-xl bg-sky-600 text-white shadow-sm">
+                <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 9.5a3.5 3.5 0 1 0 4.95 4.95"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 6h.01M7 9h.01"/>
+                </svg>
+            </div>
+        @endif
         <div x-show="sidebarOpen" x-transition:enter="transition-opacity duration-150" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="overflow-hidden">
-            <p class="text-sm font-bold text-slate-800 leading-tight whitespace-nowrap">Kee Laundry</p>
-            <p class="text-[11px] text-sky-600 font-semibold whitespace-nowrap">Pusat ▸</p>
+            <p class="text-sm font-bold text-slate-800 leading-tight whitespace-nowrap truncate max-w-[140px]">{{ $brandName }}</p>
+            <p class="text-[11px] text-sky-600 font-semibold whitespace-nowrap truncate">Outlet Utama</p>
         </div>
     </div>
 
@@ -180,17 +200,23 @@
     <header class="flex md:hidden sticky top-0 z-30 items-center h-14 px-4 bg-white/90 backdrop-blur-md border-b border-slate-200/80 gap-2">
         {{-- Logo + branch --}}
         <div class="flex items-center gap-2 flex-1 min-w-0">
-            <div class="flex items-center justify-center size-8 rounded-xl bg-sky-600 text-white shrink-0">
-                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 9.5a3.5 3.5 0 1 0 4.95 4.95"/>
-                </svg>
-            </div>
+            @if($brandLogo)
+                <div class="flex items-center justify-center size-8 rounded-xl bg-white border border-slate-200/80 p-0.5 shadow-sm overflow-hidden shrink-0">
+                    <img src="{{ $brandLogo }}" alt="{{ $brandName }}" class="size-full object-contain rounded-lg">
+                </div>
+            @else
+                <div class="flex items-center justify-center size-8 rounded-xl bg-sky-600 text-white shrink-0">
+                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 9.5a3.5 3.5 0 1 0 4.95 4.95"/>
+                    </svg>
+                </div>
+            @endif
             <div class="min-w-0">
-                <p class="text-sm font-bold text-slate-800 leading-tight">Kee Laundry</p>
-                <button class="flex items-center gap-0.5 text-[11px] text-sky-600 font-semibold">
-                    Pusat <svg class="size-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
-                </button>
+                <p class="text-sm font-bold text-slate-800 leading-tight truncate">{{ $brandName }}</p>
+                <span class="flex items-center gap-0.5 text-[11px] text-sky-600 font-semibold truncate">
+                    Outlet Utama
+                </span>
             </div>
         </div>
 
@@ -325,54 +351,45 @@
      GLOBAL COMPONENTS (visible on all screen sizes)
 ══════════════════════════════════════════════════════════════════ --}}
 
-{{-- ── Toast Notification Stack ───────────────────────────────── --}}
+{{-- ── Toast Notification Stack (Modern Floating Capsule Pill) ───────────────────────────────── --}}
 <div
     id="toast-container"
     aria-live="polite"
     aria-atomic="false"
-    class="fixed top-4 right-4 z-[100] flex flex-col gap-2 w-full max-w-sm pointer-events-none"
+    class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center gap-2 w-full max-w-md px-4 pointer-events-none"
     x-data="toastManager()"
     @toast.window="addToast($event.detail)"
 >
     <template x-for="t in toasts" :key="t.id">
         <div
             x-show="t.visible"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+            x-transition:enter="transition ease-out duration-250"
+            x-transition:enter-start="opacity-0 -translate-y-3 scale-95"
             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="toast pointer-events-auto"
+            x-transition:leave-end="opacity-0 -translate-y-2 scale-95"
+            class="pointer-events-auto flex items-center gap-2.5 bg-slate-900/95 text-white backdrop-blur-md px-4 py-2.5 rounded-full shadow-2xl border border-slate-700/60 text-xs sm:text-sm font-medium transition-all"
         >
-            {{-- Icon --}}
-            <div class="shrink-0 mt-0.5" :class="{
-                'text-emerald-500': t.type === 'success',
-                'text-rose-500':    t.type === 'error',
-                'text-amber-500':   t.type === 'warning',
-                'text-sky-500':     t.type === 'info',
-            }">
-                <template x-if="t.type === 'success'">
-                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                </template>
-                <template x-if="t.type === 'error'">
-                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
-                </template>
-                <template x-if="t.type === 'warning'">
-                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
-                </template>
-                <template x-if="t.type === 'info'">
-                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
-                </template>
+            {{-- Status Dot Indicator --}}
+            <span class="size-2 rounded-full shrink-0" :class="{
+                'bg-emerald-400 ring-2 ring-emerald-400/30': t.type === 'success',
+                'bg-rose-400 ring-2 ring-rose-400/30':       t.type === 'error',
+                'bg-amber-400 ring-2 ring-amber-400/30':     t.type === 'warning',
+                'bg-sky-400 ring-2 ring-sky-400/30':         t.type === 'info',
+            }"></span>
+
+            {{-- Text Content --}}
+            <div class="flex items-center gap-1.5 min-w-0">
+                <span class="font-semibold text-white truncate" x-text="t.title || t.message"></span>
+                <span class="text-slate-300 font-normal truncate hidden sm:inline"
+                      x-show="t.title && t.message && t.title !== t.message"
+                      x-text="'· ' + t.message"></span>
             </div>
-            {{-- Message --}}
-            <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-800 text-sm" x-text="t.title"></p>
-                <p class="text-slate-500 text-xs mt-0.5 leading-relaxed" x-text="t.message" x-show="t.message"></p>
-            </div>
-            {{-- Close --}}
-            <button @click="removeToast(t.id)" class="shrink-0 text-slate-400 hover:text-slate-600 transition-colors">
-                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+
+            {{-- Close Button --}}
+            <button @click="removeToast(t.id)" class="text-slate-400 hover:text-white p-0.5 rounded-full transition-colors shrink-0 ml-1" title="Tutup">
+                <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
             </button>
         </div>
     </template>
@@ -461,16 +478,23 @@ function appShell() {
     };
 }
 
-// ── Toast Manager ──────────────────────────────────────────────
+// ── Toast Manager (Clean & Resilient) ─────────────────────────
 function toastManager() {
     return {
         toasts: [],
         nextId: 0,
 
-        addToast({ type = 'info', title = '', message = '', duration = 4000 }) {
+        addToast(payload) {
+            const data = Array.isArray(payload) ? (payload[0] || {}) : (payload || {});
+            const type = data.type || 'info';
+            const title = data.title || '';
+            const message = data.message || '';
+            const duration = data.duration || 3000;
+
             const id = ++this.nextId;
             this.toasts.push({ id, type, title, message, visible: true });
-            // Auto-remove
+
+            // Auto-remove after duration
             setTimeout(() => this.removeToast(id), duration);
         },
 
@@ -479,7 +503,7 @@ function toastManager() {
             if (t) t.visible = false;
             setTimeout(() => {
                 this.toasts = this.toasts.filter(t => t.id !== id);
-            }, 300);
+            }, 250);
         },
     };
 }

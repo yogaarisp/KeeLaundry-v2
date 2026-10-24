@@ -5,53 +5,53 @@
 >
 
 {{-- ══════════════════════════════════════════════════════════════
-     HEADER: Period Selector + Refresh
+     HEADER: Period Selector + Refresh (Responsive Layout)
 ══════════════════════════════════════════════════════════════════ --}}
-<div class="flex flex-col sm:flex-row sm:items-center gap-3">
-    <div>
-        <h2 class="text-lg font-bold text-slate-800">Executive Dashboard</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Cabang Utama · Real-time</p>
-    </div>
-
-    <div class="flex items-center gap-2 sm:ml-auto flex-wrap">
-        {{-- Period Selector --}}
-        <div class="flex items-center gap-1 bg-slate-100 rounded-xl p-1">
-            @foreach (['today' => 'Hari Ini', '7d' => '7 Hari', 'mtd' => 'Bulan Ini', '30d' => '30 Hari'] as $key => $label)
-                <button
-                    wire:click="setPeriod('{{ $key }}')"
-                    @class([
-                        'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150',
-                        'bg-white shadow-sm text-sky-700' => $period === $key,
-                        'text-slate-500 hover:text-slate-700' => $period !== $key,
-                    ])
-                >{{ $label }}</button>
-            @endforeach
+<div class="space-y-3">
+    <div class="flex items-center justify-between gap-3">
+        <div>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-800 leading-tight">Executive Dashboard</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Cabang Utama · Real-time</p>
         </div>
 
-        {{-- Refresh --}}
-        <button wire:click="refresh" class="btn-icon" title="Refresh data"
+        {{-- Refresh Button --}}
+        <button wire:click="refresh" class="btn-icon shrink-0" title="Refresh data"
                 wire:loading.class="animate-spin" wire:target="refresh">
             <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/>
             </svg>
         </button>
     </div>
+
+    {{-- Period Selector (4-column Segmented Control on mobile, fit on desktop) --}}
+    <div class="grid grid-cols-4 sm:flex sm:w-fit bg-slate-100 rounded-xl p-1 gap-1">
+        @foreach (['today' => 'Hari Ini', '7d' => '7 Hari', 'mtd' => 'Bulan Ini', '30d' => '30 Hari'] as $key => $label)
+            <button
+                wire:click="setPeriod('{{ $key }}')"
+                @class([
+                    'px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-center transition-all duration-150',
+                    'bg-white shadow-xs text-sky-700' => $period === $key,
+                    'text-slate-500 hover:text-slate-700' => $period !== $key,
+                ])
+            >{{ $label }}</button>
+        @endforeach
+    </div>
 </div>
 
 {{-- ══════════════════════════════════════════════════════════════
-     KPI CARDS ROW 1: Omzet, Jumlah Order, Total Kg, Avg
+     KPI METRICS: Hero Omzet Card + 3 Balanced Sub-Metrics Grid
 ══════════════════════════════════════════════════════════════════ --}}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+<div class="space-y-3 lg:space-y-0 lg:grid lg:grid-cols-4 lg:gap-3">
 
-    {{-- Omzet --}}
-    <div class="kpi-card col-span-2 sm:col-span-1">
+    {{-- Omzet (Hero Card on Mobile, Col 1 on Desktop) --}}
+    <div class="kpi-card lg:col-span-1 p-4 sm:p-5">
         <div class="flex items-center justify-between">
             <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Omzet</span>
             <div class="flex items-center justify-center size-8 rounded-xl bg-sky-50 text-sky-600">
                 <x-icon name="currency-dollar" class="size-4"/>
             </div>
         </div>
-        <p class="text-2xl font-bold text-slate-800 mt-1 tabular-nums" wire:loading.class="opacity-40">
+        <p class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-1.5 tabular-nums" wire:loading.class="opacity-40">
             Rp {{ number_format($this->omzetPeriod) }}
         </p>
         @php
@@ -59,7 +59,7 @@
                 ? round((($this->omzetPeriod - $this->omzetLastPeriod) / $this->omzetLastPeriod) * 100, 1)
                 : 0;
         @endphp
-        <div class="flex items-center gap-1 mt-1">
+        <div class="flex items-center gap-1 mt-1.5">
             @if ($omzetChange >= 0)
                 <x-icon name="arrow-trending-up" class="size-3.5 text-emerald-500"/>
                 <span class="text-xs font-semibold text-emerald-600">+{{ $omzetChange }}%</span>
@@ -67,44 +67,56 @@
                 <x-icon name="arrow-trending-down" class="size-3.5 text-rose-500"/>
                 <span class="text-xs font-semibold text-rose-600">{{ $omzetChange }}%</span>
             @endif
-            <span class="text-xs text-slate-400">vs periode sebelumnya</span>
+            <span class="text-xs text-slate-400">vs periode lalu</span>
         </div>
     </div>
 
-    {{-- Jumlah Order --}}
-    <div class="kpi-card">
-        <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Order</span>
-            <div class="flex items-center justify-center size-8 rounded-xl bg-emerald-50 text-emerald-600">
-                <x-icon name="check-circle" class="size-4"/>
+    {{-- 3 Sub-Metrics (3-Column Equal Grid on Mobile, 3 Cols on Desktop) --}}
+    <div class="grid grid-cols-3 gap-2 sm:gap-3 lg:col-span-3 lg:grid-cols-3">
+        {{-- Jumlah Order --}}
+        <div class="kpi-card p-3 sm:p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wide truncate">Order</span>
+                <div class="flex items-center justify-center size-6 sm:size-8 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 shrink-0">
+                    <x-icon name="check-circle" class="size-3.5 sm:size-4"/>
+                </div>
+            </div>
+            <div class="mt-2">
+                <p class="text-lg sm:text-2xl font-bold text-slate-800 tabular-nums leading-none">{{ $this->orderCountPeriod }}</p>
+                <p class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate">nota masuk</p>
             </div>
         </div>
-        <p class="text-2xl font-bold text-slate-800 mt-1 tabular-nums">{{ $this->orderCountPeriod }}</p>
-        <p class="text-xs text-slate-400 mt-1">nota masuk</p>
-    </div>
 
-    {{-- Total Kg --}}
-    <div class="kpi-card">
-        <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Total Kg</span>
-            <div class="flex items-center justify-center size-8 rounded-xl bg-cyan-50 text-cyan-600">
-                <x-icon name="scale" class="size-4"/>
+        {{-- Total Kg --}}
+        <div class="kpi-card p-3 sm:p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wide truncate">Total Kg</span>
+                <div class="flex items-center justify-center size-6 sm:size-8 rounded-lg sm:rounded-xl bg-cyan-50 text-cyan-600 shrink-0">
+                    <x-icon name="scale" class="size-3.5 sm:size-4"/>
+                </div>
+            </div>
+            <div class="mt-2">
+                <p class="text-lg sm:text-2xl font-bold text-slate-800 tabular-nums leading-none">{{ number_format($this->totalKgPeriod, 1) }}</p>
+                <p class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate">Kg tercuci</p>
             </div>
         </div>
-        <p class="text-2xl font-bold text-slate-800 mt-1 tabular-nums">{{ number_format($this->totalKgPeriod, 1) }}</p>
-        <p class="text-xs text-slate-400 mt-1">Kg tercuci</p>
-    </div>
 
-    {{-- Avg Order Value --}}
-    <div class="kpi-card">
-        <div class="flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Avg Order</span>
-            <div class="flex items-center justify-center size-8 rounded-xl bg-amber-50 text-amber-600">
-                <x-icon name="chart-bar" class="size-4"/>
+        {{-- Avg Order Value --}}
+        <div class="kpi-card p-3 sm:p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wide truncate">Avg Order</span>
+                <div class="flex items-center justify-center size-6 sm:size-8 rounded-lg sm:rounded-xl bg-amber-50 text-amber-600 shrink-0">
+                    <x-icon name="chart-bar" class="size-3.5 sm:size-4"/>
+                </div>
+            </div>
+            <div class="mt-2">
+                <p class="text-base sm:text-2xl font-bold text-slate-800 tabular-nums leading-none">
+                    <span class="sm:hidden">Rp {{ number_format($this->avgOrderValue / 1000, 0) }}k</span>
+                    <span class="hidden sm:inline">Rp {{ number_format($this->avgOrderValue) }}</span>
+                </p>
+                <p class="text-[10px] sm:text-xs text-slate-400 mt-1 truncate">rata-rata</p>
             </div>
         </div>
-        <p class="text-2xl font-bold text-slate-800 mt-1 tabular-nums">Rp {{ number_format($this->avgOrderValue) }}</p>
-        <p class="text-xs text-slate-400 mt-1">rata-rata / nota</p>
     </div>
 </div>
 
@@ -253,21 +265,24 @@
                 } }}
             </p>
         </div>
-        <div class="flex gap-1 bg-slate-100 rounded-xl p-1">
+        <div class="grid grid-cols-3 sm:flex sm:w-fit w-full bg-slate-100 rounded-xl p-1 gap-1">
             <button @click="chartMode = 'omzet'; updateChart()"
-                    :class="chartMode === 'omzet' ? 'bg-white shadow-sm text-sky-700' : 'text-slate-500 hover:text-slate-700'"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
-                Omzet (Rp)
+                    :class="chartMode === 'omzet' ? 'bg-white shadow-xs text-sky-700' : 'text-slate-500 hover:text-slate-700'"
+                    class="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center">
+                <span class="sm:hidden">Omzet</span>
+                <span class="hidden sm:inline">Omzet (Rp)</span>
             </button>
             <button @click="chartMode = 'kg'; updateChart()"
-                    :class="chartMode === 'kg' ? 'bg-white shadow-sm text-sky-700' : 'text-slate-500 hover:text-slate-700'"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
-                Volume (Kg)
+                    :class="chartMode === 'kg' ? 'bg-white shadow-xs text-sky-700' : 'text-slate-500 hover:text-slate-700'"
+                    class="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center">
+                <span class="sm:hidden">Kg</span>
+                <span class="hidden sm:inline">Volume (Kg)</span>
             </button>
             <button @click="chartMode = 'count'; updateChart()"
-                    :class="chartMode === 'count' ? 'bg-white shadow-sm text-sky-700' : 'text-slate-500 hover:text-slate-700'"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
-                Jumlah Order
+                    :class="chartMode === 'count' ? 'bg-white shadow-xs text-sky-700' : 'text-slate-500 hover:text-slate-700'"
+                    class="px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center">
+                <span class="sm:hidden">Order</span>
+                <span class="hidden sm:inline">Jumlah Order</span>
             </button>
         </div>
     </div>

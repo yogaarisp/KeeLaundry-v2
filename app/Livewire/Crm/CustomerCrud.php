@@ -20,6 +20,10 @@ class CustomerCrud extends Component
     public string $search    = '';
     public string $filterTier = '';
 
+    // ── Tier Inspect Modal (Mobile Bottom-Sheet & Desktop Centered) ──
+    public bool   $showTierModal = false;
+    public string $inspectTier   = 'REGULAR';
+
     // ── Customer form ──────────────────────────────────────────────
     public bool    $showForm     = false;
     public ?int    $editingId    = null;
@@ -89,10 +93,39 @@ class CustomerCrud extends Component
     #[Computed]
     public function tierStats(): array
     {
-        return Customer::selectRaw("tier, COUNT(*) as total")
+        return Customer::selectRaw("tier, COUNT(*) as total, SUM(CASE WHEN last_order_date >= DATE_SUB(NOW(), INTERVAL 14 DAY) THEN 1 ELSE 0 END) as active")
             ->groupBy('tier')
-            ->pluck('total', 'tier')
+            ->get()
+            ->keyBy('tier')
             ->toArray();
+    }
+
+    #[Computed]
+    public function inspectedCustomers(): Collection
+    {
+        return Customer::withTrashed()
+            ->where('tier', $this->inspectTier)
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function openTierInspect(string $tier): void
+    {
+        $this->inspectTier = strtoupper($tier);
+        $this->showTierModal = true;
+    }
+
+    public function closeTierInspect(): void
+    {
+        $this->showTierModal = false;
+    }
+
+    public function createForTier(string $tier): void
+    {
+        $this->closeTierInspect();
+        $this->resetForm();
+        $this->tier = strtoupper($tier);
+        $this->showForm = true;
     }
 
     #[Computed]
@@ -178,13 +211,9 @@ class CustomerCrud extends Component
 
             if ($this->editingId) {
                 Customer::withTrashed()->findOrFail($this->editingId)->update($data);
-                $msg = "Data «{$this->name}» berhasil diperbarui.";
             } else {
                 Customer::create($data);
-                $msg = "Pelanggan «{$this->name}» berhasil didaftarkan.";
             }
-
-            $this->dispatch('notify', ['type' => 'success', 'title' => 'Tersimpan', 'message' => $msg]);
         });
 
         $this->closeForm();

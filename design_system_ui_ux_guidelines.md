@@ -77,3 +77,34 @@ Untuk seluruh halaman CRUD (Riwayat Order, Pelanggan CRM, Karyawan HR, Stok Sabu
 - Semua aksi **Tambah Data (Create)** dan **Edit Data (Update)** menggunakan satu komponen modal adaptif:
   - Di Desktop: Tampil sebagai *Centered Modal Dialog* (`max-w-lg rounded-2xl`).
   - Di Mobile: Tampil menempel di bagian bawah layar (`fixed bottom-0 inset-x-0 rounded-t-3xl max-h-[90vh] overflow-y-auto`) lengkap dengan garis *handle* abu-abu (`w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-4`) untuk memberikan sensasi aplikasi mobile *native* terbaru.
+
+---
+
+## 5. Standar Anti-AI SLOP UI (Strict Polish Standard)
+
+Menghindari kesalahan umum desain "AI Slop" (layout kaku, tombol balok menumpuk, teks patah berantakan, desimal mubazir, dan dialog janggal):
+
+### A. Mobile Layout Anti-Patterns & Solusi
+1. **Dilarang Menumpuk 3 Tombol Balok Penuh:**
+   - ❌ *AI Slop:* Tiga tombol besar bertingkat (`[Nonaktifkan]`, `[Edit]`, `[Hapus]`) di tiap kartu sehingga 2 kartu memenuhi seluruh layar HP.
+   - ✅ *Solusi:* Gunakan tombol aksi kompak (`Edit` dengan icon pensil + toggle status), dan gunakan tombol icon sampah merah minimalis di pojok kanan.
+2. **Interactive Status Badge (Quick Toggle):**
+   - Jadikan badge status `✓ Aktif` / `Nonaktif` dapat diklik langsung (clickable chip) untuk mengaktifkan/menonaktifkan item secara instan tanpa perlu tombol balok terpisah.
+3. **Navigasi Modal Bottom Sheet Bergaya Native:**
+   - Tombol navigasi kembali menggunakan **Back (`←`)** di pojok kiri atas dekat judul/icon.
+   - Hapus tombol Close `(X)` di kanan atas pada mobile dan **hilangkan tombol "Tutup" footer** di bagian bawah yang membuang area scroll vertikal.
+4. **No Awkward Price Wrapping:**
+   - Label harga dan satuan WAJIB dibungkus `whitespace-nowrap` (`Rp 10.000/Kg`), jangan sampai `/Kg` patah ke baris bawah.
+5. **Clean Numbers & Typography:**
+   - Hilangkan desimal `.00` pada angka bulat (misal `15ml`, bukan `15.00ml`).
+   - Sembunyikan subtitle deskripsi panjang di header pada mobile (`hidden sm:block`) agar area scroll konten langsung luas.
+
+### B. Desktop Layout Anti-Patterns & Solusi
+1. **Dilarang Menyembunyikan Tabel Master di Balik Placeholder Kosong:**
+   - ❌ *AI Slop:* Tabel master disembunyikan dan hanya menampilkan box dashed kosong bertuliskan "Klik salah satu kategori di atas...".
+   - ✅ *Solusi:* Di desktop (`hidden md:block`), **Tabel Master Layanan WAJIB selalu tampil penuh**.
+2. **Kartu Kategori Sebagai Quick Filter Tab:**
+   - Kartu kategori di atas berfungsi sebagai **Interactive Quick Filter Tab**. Klik kartu kategori langsung memfilter tabel di bawahnya (diberi highlight border biru + indikator `✓ Aktif difilter`), klik sekali lagi untuk reset.
+3. **Pemisahan Navigasi Desktop vs Mobile Modal:**
+   - Tombol panah Back (`←`) khusus ditampilkan di mobile (`md:hidden`).
+   - Di desktop, modal dialog centered tetap menggunakan tombol Close `(X)` di kanan atas yang proporsional.

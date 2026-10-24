@@ -452,12 +452,12 @@
 </div>
 @endif
 
-{{-- ══ RECEIPT MODAL ═══════════════════════════════════════════════ --}}
+{{-- ══ RECEIPT MODAL (RESPONSIVE THERMAL RECEIPT MODAL) ═══════════ --}}
 <div x-show="showReceipt" x-cloak style="display:none">
     <div class="dialog-overlay" @click.self="showReceipt = false">
         <div x-show="showReceipt"
              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-             class="dialog-panel max-w-xs w-full mx-auto">
+             class="pointer-events-auto w-full max-w-sm sm:max-w-md mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
             @if ($this->receiptOrder)
             @include('livewire.pos._receipt', ['order' => $this->receiptOrder])
             @endif

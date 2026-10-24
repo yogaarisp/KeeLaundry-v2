@@ -10,6 +10,8 @@ class Branch extends Model
     protected $fillable = [
         'code',
         'name',
+        'logo_url',
+        'favicon_url',
         'phone',
         'address',
         'operational_hours',

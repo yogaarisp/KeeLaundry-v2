@@ -7,6 +7,18 @@
     <title>{{ $title ?? 'Lacak Cucian – Kee Laundry' }}</title>
     <meta name="description" content="Lacak status cucian Anda di Kee Laundry secara real-time tanpa perlu login.">
 
+    @php
+        $activeBranch = \App\Models\Branch::find(session('active_branch_id', 1)) ?? \App\Models\Branch::first();
+        $brandFavicon = $activeBranch?->favicon_url;
+    @endphp
+
+    @if($brandFavicon)
+        <link rel="icon" href="{{ $brandFavicon }}">
+        <link rel="apple-touch-icon" href="{{ $brandFavicon }}">
+    @else
+        <link rel="icon" href="/favicon.ico">
+    @endif
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">

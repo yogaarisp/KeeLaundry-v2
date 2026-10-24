@@ -6,9 +6,12 @@ use App\Models\Branch;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class BranchSettings extends Component
 {
+    use WithFileUploads;
+
     // ── Active tab ─────────────────────────────────────────────────
     public string $activeTab = 'profile'; // profile | receipt | whatsapp
 
@@ -20,6 +23,12 @@ class BranchSettings extends Component
     public string $operational_hours  = '';
     public int    $target_hpp_per_kg  = 1850;
     public bool   $is_active          = true;
+
+    // ── Logo & Favicon uploads ─────────────────────────────────────
+    public $logo;
+    public $favicon;
+    public ?string $currentLogoUrl    = null;
+    public ?string $currentFaviconUrl = null;
 
     // ── Receipt fields ─────────────────────────────────────────────
     public string $receipt_footer     = '';
@@ -54,6 +63,8 @@ class BranchSettings extends Component
 
         $this->code                = $branch->code;
         $this->name                = $branch->name;
+        $this->currentLogoUrl      = $branch->logo_url;
+        $this->currentFaviconUrl   = $branch->favicon_url;
         $this->phone               = $branch->phone;
         $this->address             = $branch->address;
         $this->operational_hours   = $branch->operational_hours ?? '';
@@ -113,23 +124,63 @@ class BranchSettings extends Component
             'phone'              => ['required', 'string', 'min:8', 'max:20'],
             'address'            => ['required', 'string', 'min:10'],
             'target_hpp_per_kg'  => ['required', 'integer', 'min:100'],
+            'logo'               => ['nullable', 'image', 'mimes:png,jpg,jpeg,svg,webp', 'max:2048'],
+            'favicon'            => ['nullable', 'mimes:ico,png,jpg,jpeg,svg,webp', 'max:1024'],
         ], [], [
             'target_hpp_per_kg'  => 'Target HPP/Kg',
+            'logo'               => 'Logo Toko',
+            'favicon'            => 'Favicon Toko',
         ]);
 
         DB::transaction(function () {
-            Branch::where('id', session('active_branch_id', 1))->update([
+            $branch = Branch::findOrFail(session('active_branch_id', 1));
+
+            $updateData = [
                 'name'               => trim($this->name),
                 'phone'              => trim($this->phone),
                 'address'            => trim($this->address),
                 'operational_hours'  => trim($this->operational_hours) ?: null,
                 'target_hpp_per_kg'  => $this->target_hpp_per_kg,
                 'is_active'          => $this->is_active,
-            ]);
+            ];
+
+            if ($this->logo) {
+                $logoPath = $this->logo->store('branding', 'public');
+                $updateData['logo_url'] = '/storage/' . $logoPath;
+                $this->currentLogoUrl = '/storage/' . $logoPath;
+                $this->logo = null;
+            }
+
+            if ($this->favicon) {
+                $faviconPath = $this->favicon->store('branding', 'public');
+                $updateData['favicon_url'] = '/storage/' . $faviconPath;
+                $this->currentFaviconUrl = '/storage/' . $faviconPath;
+                $this->favicon = null;
+            }
+
+            $branch->update($updateData);
         });
 
         unset($this->branch);
-        $this->dispatch('notify', ['type' => 'success', 'title' => 'Profil Tersimpan', 'message' => 'Data profil toko berhasil diperbarui.']);
+        $this->dispatch('notify', ['type' => 'success', 'title' => 'Profil Tersimpan', 'message' => 'Data profil, logo, dan favicon toko berhasil diperbarui.']);
+    }
+
+    public function deleteLogo(): void
+    {
+        Branch::where('id', session('active_branch_id', 1))->update(['logo_url' => null]);
+        $this->currentLogoUrl = null;
+        $this->logo = null;
+        unset($this->branch);
+        $this->dispatch('notify', ['type' => 'info', 'title' => 'Logo Dihapus', 'message' => 'Logo toko berhasil dihapus.']);
+    }
+
+    public function deleteFavicon(): void
+    {
+        Branch::where('id', session('active_branch_id', 1))->update(['favicon_url' => null]);
+        $this->currentFaviconUrl = null;
+        $this->favicon = null;
+        unset($this->branch);
+        $this->dispatch('notify', ['type' => 'info', 'title' => 'Favicon Dihapus', 'message' => 'Favicon toko berhasil dihapus.']);
     }
 
     // ── Save: Receipt ──────────────────────────────────────────────
