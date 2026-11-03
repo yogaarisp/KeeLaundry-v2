@@ -197,7 +197,8 @@
     </header>
 
     {{-- ── Mobile Sticky Top Header (hidden on desktop) ────────── --}}
-    <header class="flex md:hidden sticky top-0 z-30 items-center h-14 px-4 bg-white/90 backdrop-blur-md border-b border-slate-200/80 gap-2">
+    <header class="flex md:hidden sticky top-0 z-30 flex-col bg-white/90 backdrop-blur-md border-b border-slate-200/80 pt-safe">
+        <div class="flex items-center h-14 px-4 gap-2 w-full">
         {{-- Logo + branch --}}
         <div class="flex items-center gap-2 flex-1 min-w-0">
             @if($brandLogo)
@@ -243,6 +244,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
             </svg>
         </button>
+        </div>{{-- /inner flex row --}}
     </header>
 
     {{-- ── Single Page Content (Rendered ONCE!) ───────────────── --}}
