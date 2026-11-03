@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Kee Laundry</string>
+    <string name="title_activity_main">Kee Laundry</string>
+    <string name="package_name">id.keetech.keelaundry</string>
+    <string name="custom_url_scheme">id.keetech.keelaundry</string>
+</resources>

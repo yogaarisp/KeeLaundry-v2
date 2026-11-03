@@ -1,0 +1,17 @@
+{
+  "appId": "id.keetech.keelaundry",
+  "appName": "Kee Laundry",
+  "webDir": "public",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://laundry.keetech.my.id",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
+
