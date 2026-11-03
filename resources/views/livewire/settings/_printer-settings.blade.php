@@ -1,221 +1,244 @@
 <div class="space-y-5" x-data="thermalPrinterManager()">
 
-    {{-- ══ HEADER ════════════════════════════════════════════════════ --}}
-    <div class="flex items-center gap-2.5">
-        <div class="size-8 rounded-xl bg-sky-50 border border-sky-200/70 text-sky-600 flex items-center justify-center shadow-2xs">
-            <svg class="size-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-            </svg>
-        </div>
-        <div>
-            <h3 class="text-sm font-bold text-slate-800 tracking-tight">Printer Thermal</h3>
-            <p class="text-[11px] text-slate-400 mt-0.5">Kelola koneksi printer Bluetooth/USB &amp; setelan cetak struk POS</p>
-        </div>
-    </div>
-
-    {{-- ══ KARTU 1: STATUS & KONEKSI PRINTER ═══════════════════════ --}}
-    <div class="card p-5 sm:p-6 space-y-5 shadow-sm border border-slate-200/80">
-        <div class="border-b border-slate-100 pb-3">
-            <h4 class="text-sm font-bold text-slate-800">Status Koneksi</h4>
-            <p class="text-xs text-slate-400 mt-0.5">Hubungkan printer thermal via Bluetooth atau USB Serial</p>
-        </div>
-
-        {{-- Status Row --}}
-        <div class="flex items-center justify-between p-3.5 rounded-xl border transition-colors"
-             :class="connectionStatus === 'connected' ? 'bg-emerald-50/60 border-emerald-200/80' : 'bg-slate-50 border-slate-200'">
+    {{-- ══ BAGIAN 1: STATUS PRINTER (Hero Card) ══════════════════════ --}}
+    <div class="card overflow-hidden">
+        {{-- Header strip --}}
+        <div class="px-5 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <div class="size-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
-                     :class="connectionStatus === 'connected' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'">
+                <div class="size-9 rounded-xl bg-sky-50 border border-sky-200/70 text-sky-600 flex items-center justify-center shadow-2xs shrink-0">
                     <svg class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
                     </svg>
                 </div>
                 <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="size-2 rounded-full shrink-0 transition-colors"
-                              :class="connectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'"></span>
-                        <p class="text-xs font-bold"
-                           :class="connectionStatus === 'connected' ? 'text-emerald-800' : 'text-slate-700'"
-                           x-text="connectionStatus === 'connected' ? ('Terhubung: ' + (deviceName || 'Printer Bluetooth')) : 'Printer Belum Terhubung'">
-                        </p>
-                    </div>
-                    <p class="text-[11px] mt-0.5"
+                    <h3 class="text-sm font-bold text-slate-800 leading-tight">Printer Thermal POS</h3>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Koneksi &amp; setelan cetak struk kasir</p>
+                </div>
+            </div>
+
+            {{-- Status Pill --}}
+            <div class="shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1 border text-[11px] font-bold transition-all"
+                 :class="connectionStatus === 'connected'
+                     ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                     : 'bg-slate-50 border-slate-200 text-slate-500'">
+                <span class="size-2 rounded-full shrink-0"
+                      :class="connectionStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'"></span>
+                <span x-text="connectionStatus === 'connected' ? 'Terhubung' : 'Tidak Terhubung'"></span>
+            </div>
+        </div>
+
+        {{-- Body: Info & Actions --}}
+        <div class="p-5 space-y-4">
+            {{-- Printer device info row --}}
+            <div class="flex items-center gap-4 p-4 rounded-2xl border transition-all"
+                 :class="connectionStatus === 'connected'
+                     ? 'bg-emerald-50/50 border-emerald-200/80'
+                     : 'bg-slate-50/80 border-slate-200 border-dashed'">
+                {{-- Printer Icon Box --}}
+                <div class="size-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all"
+                     :class="connectionStatus === 'connected'
+                         ? 'bg-emerald-100 border-emerald-200 text-emerald-600'
+                         : 'bg-white border-slate-200 text-slate-300'">
+                    <svg class="size-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+                    </svg>
+                </div>
+
+                {{-- Info --}}
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold leading-tight transition-colors"
+                       :class="connectionStatus === 'connected' ? 'text-emerald-800' : 'text-slate-400'"
+                       x-text="connectionStatus === 'connected' ? (deviceName || 'Printer Bluetooth') : 'Belum ada printer terhubung'">
+                    </p>
+                    <p class="text-[11px] mt-0.5 transition-colors"
                        :class="connectionStatus === 'connected' ? 'text-emerald-600' : 'text-slate-400'"
-                       x-text="connectionStatus === 'connected' ? 'Siap mencetak struk transaksi' : 'Tap tombol di bawah untuk memulai koneksi'">
+                       x-text="connectionStatus === 'connected' ? 'Siap mencetak struk transaksi' : 'Tap Scan untuk mencari printer Bluetooth di sekitar'">
                     </p>
                 </div>
+
+                {{-- Tombol Putuskan --}}
+                <button x-show="connectionStatus === 'connected'"
+                        x-cloak
+                        @click="disconnect()"
+                        type="button"
+                        class="shrink-0 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl transition-colors shadow-2xs">
+                    Putuskan
+                </button>
             </div>
 
-            {{-- Tombol Putuskan --}}
-            <button x-show="connectionStatus === 'connected'"
-                    x-cloak
-                    @click="disconnect()"
-                    type="button"
-                    class="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 px-3 py-1.5 rounded-xl transition-colors shrink-0">
-                Putuskan
-            </button>
-        </div>
-
-        {{-- Action Buttons --}}
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <button type="button"
-                    @click="scanAndConnect()"
-                    :disabled="isConnecting"
-                    class="btn-primary flex-1 py-3 justify-center gap-2 text-sm disabled:opacity-60 cursor-pointer">
-                <svg x-show="!isConnecting" class="size-4.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.98 0 13.788M12 12h.008v.008H12V12Z"/>
-                </svg>
-                <svg x-show="isConnecting" class="size-4.5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                </svg>
-                <span x-text="isConnecting ? 'Mencari Perangkat Bluetooth…' : 'Scan & Hubungkan Printer'"></span>
-            </button>
-
-            <button type="button"
-                    @click="testPrint()"
-                    class="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 font-bold text-sm shadow-2xs transition-all shrink-0 cursor-pointer">
-                <svg class="size-4.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-                </svg>
-                Test Print
-            </button>
-        </div>
-    </div>
-
-    {{-- ══ KARTU 2: SETELAN CETAK ════════════════════════════════════ --}}
-    <div class="card p-5 sm:p-6 space-y-5 shadow-sm border border-slate-200/80">
-        <div class="border-b border-slate-100 pb-3">
-            <h4 class="text-sm font-bold text-slate-800">Setelan Cetak</h4>
-            <p class="text-xs text-slate-400 mt-0.5">Ukuran kertas roll thermal &amp; opsi cetak otomatis</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {{-- Ukuran Kertas --}}
-            <div class="space-y-3">
-                <div class="flex items-center gap-1.5">
-                    <label class="form-label mb-0 text-xs font-bold text-slate-700">Ukuran Kertas</label>
-                    <span class="text-slate-400 hover:text-slate-600 cursor-pointer" title="Pilih ukuran lebar kertas sesuai jenis roll printer thermal kasir Anda">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+            {{-- Action Buttons --}}
+            <div class="flex items-center gap-2.5">
+                {{-- Scan & Connect --}}
+                <button type="button"
+                        @click="scanAndConnect()"
+                        :disabled="isConnecting"
+                        class="btn-primary flex-1 justify-center py-2.5 gap-2 text-sm disabled:opacity-60">
+                    <template x-if="!isConnecting">
+                        <svg class="size-4.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.98 0 13.788M12 12h.008v.008H12V12Z"/>
                         </svg>
-                    </span>
-                </div>
+                    </template>
+                    <template x-if="isConnecting">
+                        <svg class="size-4.5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                    </template>
+                    <span x-text="isConnecting ? 'Mencari Printer…' : 'Scan & Hubungkan'"></span>
+                </button>
 
-                <div class="grid grid-cols-2 gap-3">
-                    {{-- 58mm --}}
-                    <button type="button"
-                            wire:click="$set('printer_paper_size', '58mm')"
-                            @click="$nextTick(() => @this.savePrinter())"
-                            @class([
-                                'relative p-4 rounded-2xl text-center transition-all flex flex-col items-center justify-center min-h-[88px] cursor-pointer',
-                                'border-2 border-sky-500 bg-sky-50/40 shadow-xs' => $printer_paper_size === '58mm',
-                                'border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60' => $printer_paper_size !== '58mm',
-                            ])>
-                        <span @class([
-                            'text-2xl font-extrabold tracking-tight',
-                            'text-sky-600' => $printer_paper_size === '58mm',
-                            'text-slate-400' => $printer_paper_size !== '58mm',
-                        ])>58mm</span>
-                        <span @class([
-                            'text-[10px] font-bold tracking-widest mt-0.5 uppercase',
-                            'text-sky-500' => $printer_paper_size === '58mm',
-                            'text-slate-400' => $printer_paper_size !== '58mm',
-                        ])>Standard</span>
-                        @if ($printer_paper_size === '58mm')
-                            <div class="absolute bottom-2 right-2 size-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-[11px] font-bold shadow-2xs">✓</div>
-                        @endif
-                    </button>
+                {{-- Test Print --}}
+                <button type="button"
+                        @click="testPrint()"
+                        class="btn-secondary py-2.5 px-4 gap-2 shrink-0">
+                    <svg class="size-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+                    </svg>
+                    <span class="hidden sm:inline">Test Print</span>
+                </button>
 
-                    {{-- 80mm --}}
-                    <button type="button"
-                            wire:click="$set('printer_paper_size', '80mm')"
-                            @click="$nextTick(() => @this.savePrinter())"
-                            @class([
-                                'relative p-4 rounded-2xl text-center transition-all flex flex-col items-center justify-center min-h-[88px] cursor-pointer',
-                                'border-2 border-sky-500 bg-sky-50/40 shadow-xs' => $printer_paper_size === '80mm',
-                                'border border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60' => $printer_paper_size !== '80mm',
-                            ])>
-                        <span @class([
-                            'text-2xl font-extrabold tracking-tight',
-                            'text-sky-600' => $printer_paper_size === '80mm',
-                            'text-slate-400' => $printer_paper_size !== '80mm',
-                        ])>80mm</span>
-                        <span @class([
-                            'text-[10px] font-bold tracking-widest mt-0.5 uppercase',
-                            'text-sky-500' => $printer_paper_size === '80mm',
-                            'text-slate-400' => $printer_paper_size !== '80mm',
-                        ])>Large</span>
-                        @if ($printer_paper_size === '80mm')
-                            <div class="absolute bottom-2 right-2 size-5 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-[11px] font-bold shadow-2xs">✓</div>
-                        @endif
-                    </button>
-                </div>
+                {{-- USB --}}
+                <button type="button"
+                        @click="pairUsb()"
+                        class="btn-icon shrink-0" title="Hubungkan via USB">
+                    <svg class="size-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/>
+                    </svg>
+                </button>
             </div>
-
-            {{-- Auto Print Struk --}}
-            <div class="space-y-3">
-                <label class="form-label text-xs font-bold text-slate-700">Auto Print Struk</label>
-                <div class="flex items-start justify-between p-4 rounded-xl border transition-colors"
-                     :class="$wire.printer_auto_print ? 'bg-sky-50/50 border-sky-200/80' : 'bg-slate-50 border-slate-200'">
-                    <div class="space-y-1 pr-4">
-                        <p class="text-xs font-bold"
-                           :class="$wire.printer_auto_print ? 'text-sky-800' : 'text-slate-700'">
-                            Cetak Otomatis
-                        </p>
-                        <p class="text-[11px] text-slate-400 leading-relaxed">Struk langsung tercetak setelah transaksi selesai diselesaikan</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
-                        <input type="checkbox"
-                               wire:model.live="printer_auto_print"
-                               @change="$nextTick(() => @this.savePrinter())"
-                               class="sr-only peer">
-                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
-                    </label>
-                </div>
-
-                {{-- Metode Saat Ini --}}
-                <div class="flex items-center justify-between py-2 px-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                    <span class="text-xs text-slate-500">Metode cetak aktif:</span>
-                    <span class="text-xs font-bold text-slate-700 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg font-mono shadow-2xs">{{ $printer_type }}</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Opsi Alternatif --}}
-        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
-            <span class="text-[11px] text-slate-400 font-semibold">Metode lain:</span>
-            <button type="button" @click="pairUsb()"
-                    class="text-[11px] font-semibold text-slate-600 hover:text-sky-600 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 px-3 py-1 rounded-lg transition-colors shadow-2xs">
-                📠 USB Kabel
-            </button>
-            <button type="button" wire:click="$set('printer_type', 'SYSTEM')" @click="$nextTick(() => @this.savePrinter())"
-                    class="text-[11px] font-semibold text-slate-600 hover:text-sky-600 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 px-3 py-1 rounded-lg transition-colors shadow-2xs">
-                🖨️ System Print Dialog
-            </button>
         </div>
     </div>
 
-    {{-- ══ KARTU 3: PETUNJUK PENGGUNAAN ════════════════════════════ --}}
-    <div class="card p-5 shadow-sm border border-slate-200/80">
+    {{-- ══ BAGIAN 2: SETELAN CETAK ════════════════════════════════════ --}}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {{-- Kiri: Ukuran Kertas --}}
+        <div class="card p-5 space-y-4">
+            <div class="border-b border-slate-100 pb-3 flex items-center gap-2">
+                <div class="size-7 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-800">Ukuran Kertas</h4>
+                    <p class="text-[11px] text-slate-400">Lebar roll thermal printer</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                {{-- 58mm --}}
+                <button type="button"
+                        wire:click="$set('printer_paper_size', '58mm')"
+                        @click="$nextTick(() => @this.savePrinter())"
+                        @class([
+                            'relative group flex flex-col items-center justify-center gap-1 p-4 rounded-2xl min-h-[90px] border-2 transition-all cursor-pointer',
+                            'border-sky-500 bg-sky-50/50 shadow-xs' => $printer_paper_size === '58mm',
+                            'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50' => $printer_paper_size !== '58mm',
+                        ])>
+                    <span @class(['text-xl font-extrabold tracking-tight leading-none', 'text-sky-600' => $printer_paper_size === '58mm', 'text-slate-400' => $printer_paper_size !== '58mm'])>58mm</span>
+                    <span @class(['text-[10px] font-bold tracking-widest uppercase', 'text-sky-400' => $printer_paper_size === '58mm', 'text-slate-300' => $printer_paper_size !== '58mm'])>Standard</span>
+                    <span @class(['text-[10px] font-semibold', 'text-sky-500' => $printer_paper_size === '58mm', 'text-slate-300' => $printer_paper_size !== '58mm'])>Kasir Umum</span>
+                    @if ($printer_paper_size === '58mm')
+                        <span class="absolute top-2 right-2 size-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px]">✓</span>
+                    @endif
+                </button>
+
+                {{-- 80mm --}}
+                <button type="button"
+                        wire:click="$set('printer_paper_size', '80mm')"
+                        @click="$nextTick(() => @this.savePrinter())"
+                        @class([
+                            'relative group flex flex-col items-center justify-center gap-1 p-4 rounded-2xl min-h-[90px] border-2 transition-all cursor-pointer',
+                            'border-sky-500 bg-sky-50/50 shadow-xs' => $printer_paper_size === '80mm',
+                            'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50' => $printer_paper_size !== '80mm',
+                        ])>
+                    <span @class(['text-xl font-extrabold tracking-tight leading-none', 'text-sky-600' => $printer_paper_size === '80mm', 'text-slate-400' => $printer_paper_size !== '80mm'])>80mm</span>
+                    <span @class(['text-[10px] font-bold tracking-widest uppercase', 'text-sky-400' => $printer_paper_size === '80mm', 'text-slate-300' => $printer_paper_size !== '80mm'])>Large</span>
+                    <span @class(['text-[10px] font-semibold', 'text-sky-500' => $printer_paper_size === '80mm', 'text-slate-300' => $printer_paper_size !== '80mm'])>Kasir Besar</span>
+                    @if ($printer_paper_size === '80mm')
+                        <span class="absolute top-2 right-2 size-5 rounded-full bg-sky-500 text-white flex items-center justify-center text-[10px]">✓</span>
+                    @endif
+                </button>
+            </div>
+        </div>
+
+        {{-- Kanan: Auto Print & Metode --}}
+        <div class="card p-5 space-y-4">
+            <div class="border-b border-slate-100 pb-3 flex items-center gap-2">
+                <div class="size-7 rounded-lg bg-slate-50 border border-slate-200 text-slate-500 flex items-center justify-center shrink-0">
+                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-800">Opsi Cetak</h4>
+                    <p class="text-[11px] text-slate-400">Setelan perilaku cetak otomatis</p>
+                </div>
+            </div>
+
+            {{-- Auto Print Toggle --}}
+            <div class="flex items-center justify-between p-3.5 rounded-xl border transition-all"
+                 :class="$wire.printer_auto_print ? 'bg-sky-50/60 border-sky-200/80' : 'bg-slate-50 border-slate-200'">
+                <div class="space-y-0.5 pr-3">
+                    <p class="text-xs font-bold text-slate-800">Auto Print Struk</p>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">Cetak otomatis setelah transaksi selesai</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input type="checkbox"
+                           wire:model.live="printer_auto_print"
+                           @change="$nextTick(() => @this.savePrinter())"
+                           class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                </label>
+            </div>
+
+            {{-- Metode Aktif & Alternatif --}}
+            <div class="space-y-2">
+                <div class="flex items-center justify-between px-1">
+                    <span class="text-[11px] text-slate-400 font-semibold">Metode cetak aktif</span>
+                    <span class="badge badge-slate text-[10px] font-mono font-bold">{{ $printer_type }}</span>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" @click="pairUsb()"
+                            class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 hover:text-sky-700 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 px-2.5 py-1 rounded-lg transition-colors shadow-2xs">
+                        <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18h3"/></svg>
+                        USB Kabel
+                    </button>
+                    <button type="button" wire:click="$set('printer_type', 'SYSTEM')" @click="$nextTick(() => @this.savePrinter())"
+                            class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 hover:text-sky-700 bg-white hover:bg-sky-50 border border-slate-200 hover:border-sky-200 px-2.5 py-1 rounded-lg transition-colors shadow-2xs">
+                        <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3"/></svg>
+                        System Dialog
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══ BAGIAN 3: PETUNJUK PENGGUNAAN ══════════════════════════════ --}}
+    <div class="card p-5">
         <div class="flex items-start gap-3.5">
-            <div class="size-9 rounded-xl bg-sky-50 border border-sky-200/70 text-sky-600 flex items-center justify-center shrink-0 mt-0.5">
-                <svg class="size-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+            <div class="size-8 rounded-xl bg-amber-50 border border-amber-200/70 text-amber-600 flex items-center justify-center shrink-0">
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
                 </svg>
             </div>
-            <div class="flex-1 space-y-2.5">
-                <p class="text-xs font-bold text-slate-800">Petunjuk Penggunaan Printer</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+            <div class="flex-1 space-y-3">
+                <div>
+                    <p class="text-xs font-bold text-slate-800">Petunjuk Penggunaan</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Pastikan kondisi berikut sebelum menghubungkan printer</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
                     @foreach ([
-                        'Pastikan Bluetooth perangkat menyala',
-                        'Printer harus mendukung perintah ESC/POS',
-                        'Gunakan Chrome atau Edge (Web Bluetooth)',
-                        'Pastikan printer sudah di-pairing dengan perangkat',
+                        ['icon' => '📶', 'text' => 'Aktifkan Bluetooth di perangkat Anda'],
+                        ['icon' => '🖨️', 'text' => 'Printer mendukung perintah ESC/POS'],
+                        ['icon' => '🌐', 'text' => 'Gunakan Google Chrome atau Microsoft Edge'],
+                        ['icon' => '🔗', 'text' => 'Printer sudah di-pairing lewat pengaturan HP/laptop'],
                     ] as $hint)
-                    <div class="flex items-start gap-2">
-                        <span class="size-1.5 rounded-full bg-sky-400 mt-1.5 shrink-0"></span>
-                        <span class="text-xs text-slate-600">{{ $hint }}</span>
+                    <div class="flex items-start gap-2.5">
+                        <span class="text-sm shrink-0 leading-tight">{{ $hint['icon'] }}</span>
+                        <span class="text-[11px] text-slate-600 leading-relaxed">{{ $hint['text'] }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -304,18 +327,15 @@ function thermalPrinterManager() {
             const paper = '{{ $printer_paper_size }}';
             const width = paper === '80mm' ? '300px' : '220px';
             const printHtml = `
-                <html>
-                <head>
-                    <title>Test Print Struk</title>
-                    <style>
-                        @page { size: ${paper} auto; margin: 0; }
-                        body { font-family: 'Courier New', monospace; width: ${width}; margin: 0 auto; padding: 10px; font-size: 12px; color: #000; }
-                        .center { text-align: center; }
-                        .dashed { border-top: 1px dashed #000; margin: 8px 0; }
-                        .bold { font-weight: bold; }
-                        .row { display: flex; justify-content: space-between; }
-                    </style>
-                </head>
+                <html><head><title>Test Print Struk</title>
+                <style>
+                    @page { size: ${paper} auto; margin: 0; }
+                    body { font-family: 'Courier New', monospace; width: ${width}; margin: 0 auto; padding: 10px; font-size: 12px; color: #000; }
+                    .center { text-align: center; }
+                    .dashed { border-top: 1px dashed #000; margin: 8px 0; }
+                    .bold { font-weight: bold; }
+                    .row { display: flex; justify-content: space-between; }
+                </style></head>
                 <body>
                     <div class="center bold" style="font-size:14px;">KEE LAUNDRY</div>
                     <div class="center">Kee Laundry Pusat</div>
@@ -329,8 +349,7 @@ function thermalPrinterManager() {
                     <div class="center bold">KONEKSI PRINTER BERHASIL!</div>
                     <div class="center" style="font-size:10px;margin-top:4px;">Kee Laundry ERP v2.0</div>
                     <br><br>
-                </body>
-                </html>
+                </body></html>
             `;
             const win = window.open('', '_blank', 'width=350,height=450');
             if (win) {
