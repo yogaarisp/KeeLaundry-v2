@@ -134,7 +134,7 @@ Jika di laptop Anda sudah terkonfigurasi variabel path `JAVA_HOME` dan Android S
 
 ## LANGKAH 3: PANDUAN INSTALASI FILE APK DI SMARTPHONE ANDROID
 
-Setelah file `app-debug.apk` (atau `KeeLaundry-v2.apk`) selesai dibuat, ikuti petunjuk berikut untuk memasang di HP:
+Setelah file `![alt text](image.png)` (atau `KeeLaundry-v2.apk`) selesai dibuat, ikuti petunjuk berikut untuk memasang di HP:
 Setelah file `app-debug.apk` (atau `KeeLaundry-v2.apk`) selesai dibuat, ikuti petunjuk berikut untuk memasang di HP:
 
 ### 1. Mengirim File ke Smartphone
