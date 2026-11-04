@@ -4,7 +4,7 @@
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
     <div>
         <h2 class="text-xl font-bold text-slate-900 tracking-tight">Pengaturan Toko</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Kelola identitas outlet, format struk thermal, koneksi printer POS, &amp; template WhatsApp otomatis</p>
+        <p class="text-xs text-slate-500 mt-0.5">Kelola identitas outlet, format struk thermal, &amp; template WhatsApp otomatis</p>
     </div>
     @if ($this->branch)
     <div class="flex items-center gap-2 self-start sm:self-auto bg-emerald-50 border border-emerald-200/80 rounded-full px-3.5 py-1.5 shadow-2xs">
@@ -21,7 +21,6 @@
     $tabs = [
         'profile'  => ['icon' => '🏪', 'short' => 'Profil',  'label' => 'Profil Toko'],
         'receipt'  => ['icon' => '🧾', 'short' => 'Struk',   'label' => 'Format Struk'],
-        'printer'  => ['icon' => '🖨️', 'short' => 'Printer', 'label' => 'Printer Thermal'],
         'whatsapp' => ['icon' => '💬', 'short' => 'WA',      'label' => 'Template WA'],
     ];
     @endphp
@@ -521,11 +520,6 @@
         </div>
     </div>
 </div>
-@endif
-
-{{-- ══ TAB: PRINTER THERMAL ══════════════════════════════════════════ --}}
-@if ($activeTab === 'printer')
-    @include('livewire.settings._printer-settings')
 @endif
 
 {{-- ══ TAB: TEMPLATE WHATSAPP ══════════════════════════════════════ --}}
