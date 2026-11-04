@@ -105,27 +105,28 @@ class ThermalPrinterService extends EventTarget {
 
         // ── PATH B: Browser Web Bluetooth ────────────────────────────────────
         if (!this.isBluetoothSupported()) {
-            throw new Error('Web Bluetooth tidak didukung. Gunakan Chrome atau Edge, atau buka lewat APK Android.')
+            if (typeof window !== 'undefined' && window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                throw new Error('Web Bluetooth dinonaktifkan oleh Chrome di protokol HTTP (' + window.location.hostname + '). Silakan buka lewat HTTPS (misal https://laundry.keetech.my.id/ atau https://keelaundry-v2.test), atau buka melalui APK Android, atau sambungkan via kabel USB.')
+            }
+            throw new Error('Web Bluetooth tidak didukung di browser ini. Gunakan Chrome atau Edge di Android/PC, atau buka lewat APK Android.')
         }
 
         // Jika ada device spesifik dari getDevices() (previously permitted)
         if (printer && printer.isWebDevice && printer.raw) {
             this.device = printer.raw
         } else {
-            // Munculkan browser picker
+            // Munculkan browser picker dengan acceptAllDevices agar SEMUA printer Bluetooth muncul di daftar
             this.device = await navigator.bluetooth.requestDevice({
-                filters: [
-                    { services: ['000018f0-0000-1000-8000-00805f9b34fb'] },
-                    { namePrefix: 'RPN' },
-                    { namePrefix: 'BlueTooth Printer' },
-                    { namePrefix: 'MPT' },
-                    { namePrefix: 'Printer' },
-                    { namePrefix: 'POS' },
-                ],
+                acceptAllDevices: true,
                 optionalServices: [
-                    '000018f0-0000-1000-8000-00805f9b34fb',
-                    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
-                    '00001101-0000-1000-8000-00805f9b34fb',
+                    '000018f0-0000-1000-8000-00805f9b34fb', // Standard thermal printer
+                    '0000ffe0-0000-1000-8000-00805f9b34fb', // HM-10 / Panda / Zjiang / Goojprt / PT-210
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455', // ISSC
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+                    '0000ff00-0000-1000-8000-00805f9b34fb',
+                    '00001101-0000-1000-8000-00805f9b34fb', // Serial Port Profile (SPP)
+                    '00001800-0000-1000-8000-00805f9b34fb',
+                    '00001801-0000-1000-8000-00805f9b34fb',
                 ],
             })
         }
@@ -157,10 +158,14 @@ class ThermalPrinterService extends EventTarget {
             }
         }
 
-        // Cari service yang cocok
+        // Cari service yang cocok dari daftar UUID printer umum
         const serviceUUIDs = [
             '000018f0-0000-1000-8000-00805f9b34fb',
+            '0000ffe0-0000-1000-8000-00805f9b34fb',
             '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+            'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+            '0000ff00-0000-1000-8000-00805f9b34fb',
+            '00001101-0000-1000-8000-00805f9b34fb',
         ]
         let service = null
         for (const uuid of serviceUUIDs) {
@@ -170,13 +175,37 @@ class ThermalPrinterService extends EventTarget {
             } catch { continue }
         }
 
-        if (!service) throw new Error('Service printer tidak ditemukan. Pastikan printer mendukung ESC/POS BLE.')
+        // Jika belum ketemu di list standar, coba cari dinamis ke semua service
+        if (!service) {
+            try {
+                const allServices = await server.getPrimaryServices()
+                for (const s of allServices) {
+                    try {
+                        const chars = await s.getCharacteristics()
+                        const writable = chars.find(c => c.properties.write || c.properties.writeWithoutResponse)
+                        if (writable) {
+                            service = s
+                            this.characteristic = writable
+                            break
+                        }
+                    } catch {}
+                }
+            } catch (e) {
+                console.warn('Fallback getPrimaryServices error:', e)
+            }
+        }
 
-        // Cari write characteristic
-        const characteristics = await service.getCharacteristics()
-        this.characteristic = characteristics.find(
-            c => c.properties.write || c.properties.writeWithoutResponse
-        )
+        if (!service && !this.characteristic) {
+            throw new Error('Service printer tidak ditemukan. Pastikan printer mendukung perintah ESC/POS BLE.')
+        }
+
+        // Cari write characteristic jika belum didapat
+        if (!this.characteristic && service) {
+            const characteristics = await service.getCharacteristics()
+            this.characteristic = characteristics.find(
+                c => c.properties.write || c.properties.writeWithoutResponse
+            )
+        }
 
         if (!this.characteristic) throw new Error('Write characteristic tidak ditemukan.')
 

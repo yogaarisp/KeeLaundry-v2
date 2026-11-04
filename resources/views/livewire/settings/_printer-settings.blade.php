@@ -357,44 +357,52 @@ function thermalPrinterManager() {
 
         async scanAndConnect() {
             const tp = window.thermalPrinter;
-            if (tp && typeof tp.scan === 'function') {
+
+            // ── Jalur 1: Aplikasi Android APK (Native Bridge) ────────────────
+            if (tp && tp.isAndroidApp && tp.isAndroidApp()) {
                 this.isConnecting = true;
                 try {
                     const printers = await tp.scan();
                     this.discoveredPrinters = printers || [];
-
-                    if (printers && printers.length > 0 && tp.isAndroidApp && tp.isAndroidApp()) {
-                        this.showPrinterList = true;
-                        this.isConnecting = false;
-                        return;
-                    }
-
-                    await tp.connect(printers && printers.length > 0 && printers[0].isWebDevice ? printers[0] : null);
-                    await this._onConnected(tp.device?.name || 'Printer Bluetooth');
-                    return;
+                    this.showPrinterList = true;
                 } catch (err) {
-                    if (err.name !== 'NotFoundError' && err.name !== 'AbortError' && !String(err).toLowerCase().includes('cancel')) {
-                        alert('Koneksi printer: ' + (err.message || String(err)));
-                    }
+                    alert('Gagal scan printer di Android: ' + (err.message || err));
                 } finally {
                     this.isConnecting = false;
                 }
+                return;
             }
 
-            // Fallback: Web Bluetooth standard browser API
+            // ── Jalur 2: Browser (Web Bluetooth API) ─────────────────────────
             if (!navigator.bluetooth) {
-                alert('Web Bluetooth tidak didukung di browser ini. Silakan gunakan Google Chrome, Microsoft Edge, atau APK Android Kee Laundry.');
+                if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+                    alert('Web Bluetooth dibatasi oleh browser pada protokol HTTP (' + window.location.hostname + ').\n\nSolusi agar bisa scan di browser:\n1. Buka via domain HTTPS (https://laundry.keetech.my.id/ atau https://keelaundry-v2.test)\n2. Atau buka lewat Aplikasi APK Android Kee Laundry\n3. Atau gunakan kabel USB (klik "Sambungkan via USB Kabel" di bawah).');
+                } else {
+                    alert('Web Bluetooth tidak didukung di browser ini. Silakan gunakan Google Chrome atau Microsoft Edge di PC/Android.');
+                }
                 return;
             }
 
             this.isConnecting = true;
             try {
+                if (tp && typeof tp.connect === 'function') {
+                    await tp.connect(null);
+                    await this._onConnected(tp.device?.name || 'Printer Bluetooth');
+                    return;
+                }
+
+                // Fallback direct browser picker
                 const device = await navigator.bluetooth.requestDevice({
                     acceptAllDevices: true,
                     optionalServices: [
                         '000018f0-0000-1000-8000-00805f9b34fb',
+                        '0000ffe0-0000-1000-8000-00805f9b34fb',
+                        '49535343-fe7d-4ae5-8fa9-9fafd205e455',
                         'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-                        '49535343-fe7d-4ae5-8fa9-9fafd205e455'
+                        '0000ff00-0000-1000-8000-00805f9b34fb',
+                        '00001101-0000-1000-8000-00805f9b34fb',
+                        '00001800-0000-1000-8000-00805f9b34fb',
+                        '00001801-0000-1000-8000-00805f9b34fb',
                     ]
                 });
 
@@ -403,7 +411,7 @@ function thermalPrinterManager() {
                 }
             } catch (err) {
                 if (err && err.name !== 'NotFoundError' && !String(err).includes('cancelled')) {
-                    alert('Gagal menghubungkan printer: ' + (err.message || err));
+                    alert('Koneksi printer: ' + (err.message || err));
                 }
             } finally {
                 this.isConnecting = false;
@@ -427,10 +435,10 @@ function thermalPrinterManager() {
             try {
                 if (tp) {
                     await tp.connect(printer);
-                    await this._onConnected(printer.name || 'Printer');
+                    await this._onConnected(printer.name || 'Printer Bluetooth');
                 }
             } catch (err) {
-                alert('Gagal: ' + (err.message || err));
+                alert('Gagal menghubungkan: ' + (err.message || err));
             } finally {
                 this.isConnecting = false;
             }
@@ -469,62 +477,36 @@ function thermalPrinterManager() {
             }
         },
 
-        testPrint() {
+        async testPrint() {
             const paper = '{{ $printer_paper_size ?? "58mm" }}';
-            const width = paper === '80mm' ? '300px' : '220px';
-            const name = this.deviceName || 'Thermal Printer POS';
+            const tp = window.thermalPrinter;
 
-            const printHtml = `
-                <html>
-                <head>
-                    <title>Test Print Struk</title>
-                    <style>
-                        @page { size: ${paper} auto; margin: 0; }
-                        body {
-                            font-family: 'Courier New', Courier, monospace;
-                            width: ${width};
-                            margin: 0 auto;
-                            padding: 10px;
-                            font-size: 12px;
-                            color: #000;
-                        }
-                        .center { text-align: center; }
-                        .dashed { border-top: 1px dashed #000; margin: 8px 0; }
-                        .bold { font-weight: bold; }
-                        .row { display: flex; justify-content: space-between; }
-                    </style>
-                </head>
-                <body>
-                    <div class="center bold" style="font-size: 15px;">KEE LAUNDRY</div>
-                    <div class="center" style="font-size: 11px;">Kee Laundry Pusat</div>
-                    <div class="center" style="font-size: 11px;">WA: 0812-3456-7890</div>
-                    <div class="dashed"></div>
-                    <div class="row"><span>Tanggal:</span><span>${new Date().toLocaleDateString('id-ID')}</span></div>
-                    <div class="row"><span>Status:</span><span class="bold">TEST PRINT OK</span></div>
-                    <div class="row"><span>Printer:</span><span>${name}</span></div>
-                    <div class="row"><span>Lebar Kertas:</span><span>${paper}</span></div>
-                    <div class="dashed"></div>
-                    <div class="center bold" style="margin: 6px 0;">KONEKSI PRINTER BERHASIL!</div>
-                    <div class="center" style="font-size: 10px;">Printer siap cetak nota kasir.</div>
-                    <div class="center" style="font-size: 9px; margin-top: 6px;">Kee Laundry ERP v2.0</div>
-                    <br><br>
-                </body>
-                </html>
-            `;
-
-            const win = window.open('', '_blank', 'width=350,height=480');
-            if (win) {
-                win.document.write(printHtml);
-                win.document.close();
-                win.focus();
-                setTimeout(() => {
-                    win.print();
-                    win.close();
-                }, 350);
-            } else {
-                window.print();
+            // 1. Jika di APK Android dan terhubung secara native
+            if (tp && tp.isAndroidApp && tp.isAndroidApp() && tp.connected) {
+                try {
+                    const sampleText = "[C]<b>KEE LAUNDRY</b>\n[C]Kee Laundry Pusat\n[C]WA: 0812-3456-7890\n[C]--------------------------------\n[L]Tanggal: " + new Date().toLocaleDateString('id-ID') + "\n[L]Status: TEST PRINT OK\n[L]Printer: " + (this.deviceName || 'Thermal') + "\n[L]Lebar: " + paper + "\n[C]--------------------------------\n[C]<b>PRINTER BERHASIL!</b>\n\n\n";
+                    window.AndroidInterface.printFormattedText(sampleText);
+                    window.showToast?.({ type: 'success', title: 'Test Print Terkirim', message: 'Cek struk fisik pada printer Anda.' });
+                    return;
+                } catch (e) {
+                    console.warn('Native print error:', e);
+                }
             }
-        }
+
+            // 2. Jika di Web Bluetooth dan terhubung
+            if (tp && tp.connected && tp.characteristic) {
+                try {
+                    await tp.printTestPage(this.deviceName || 'Thermal Printer', paper);
+                    window.showToast?.({ type: 'success', title: 'Test Print Terkirim', message: 'Cek struk fisik pada printer Anda.' });
+                    return;
+                } catch (e) {
+                    console.warn('BLE print error:', e);
+                }
+            }
+
+            // 3. Fallback: Dialog Cetak Browser
+            this._openBrowserPrint(paper);
+        },
     };
 }
 </script>
