@@ -1,12 +1,17 @@
 import './bootstrap';
 import Chart from 'chart.js/auto';
-import * as ThermalPrinter from './thermal-printer';
+import thermalPrinter from './thermal-printer';
 
-// Expose Chart globally so Alpine.js and Blade components can use it
+// Expose Chart globally
 window.Chart = Chart;
 
-// Expose ThermalPrinter globally so Alpine.js thermalPrinterManager() can use it
-window.ThermalPrinter = ThermalPrinter;
+// Expose printer singleton globally — dipakai oleh Alpine.js di blade
+window.thermalPrinter = thermalPrinter;
+
+// Listen status perubahan koneksi agar bisa dipakai secara global
+thermalPrinter.addEventListener('connection-changed', (e) => {
+    window.dispatchEvent(new CustomEvent('printer-status-changed', { detail: e.detail }));
+});
 
 // ── Global utilities ───────────────────────────────────────────
 
