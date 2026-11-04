@@ -1,4 +1,4 @@
-<div class="space-y-5" x-data="thermalPrinterManager()">
+<div class="space-y-5" x-data="thermalPrinterManager()" data-paper="{{ $printer_paper_size }}">
 
     {{-- ══ BAGIAN 1: STATUS PRINTER (Hero Card) ══════════════════════ --}}
     <div class="card overflow-hidden">
@@ -246,56 +246,44 @@
         </div>
     </div>
 </div>
-
 <script>
 function thermalPrinterManager() {
     return {
         connectionStatus: localStorage.getItem('thermal_printer_connected') === 'true' ? 'connected' : 'disconnected',
-        deviceName: localStorage.getItem('thermal_printer_name') || '{{ $printer_device_name }}',
+        deviceName: localStorage.getItem('thermal_printer_name') || '',
         isConnecting: false,
 
         async scanAndConnect() {
-            if (!navigator.bluetooth) {
-                alert('Web Bluetooth tidak didukung di browser ini. Silakan gunakan Google Chrome atau Microsoft Edge, atau buka melalui aplikasi APK Android.');
-                return;
-            }
             this.isConnecting = true;
             try {
-                const device = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: [
-                        '000018f0-0000-1000-8000-00805f9b34fb',
-                        'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
-                        '49535343-fe7d-4ae5-8fa9-9fafd205e455'
-                    ]
-                });
-                if (device) {
-                    this.deviceName = device.name || 'Printer Bluetooth';
-                    this.connectionStatus = 'connected';
-                    localStorage.setItem('thermal_printer_connected', 'true');
-                    localStorage.setItem('thermal_printer_name', this.deviceName);
-                    localStorage.setItem('thermal_printer_type', 'BLUETOOTH');
-                    await @this.updatePairedDevice('BLUETOOTH', this.deviceName);
-                    window.dispatchEvent(new CustomEvent('toast', {
-                        detail: { type: 'success', title: 'Printer Terhubung', message: 'Berhasil memasangkan printer ' + this.deviceName }
-                    }));
-                }
+                const result = await window.ThermalPrinter.scanAndConnect();
+                this.deviceName = result.name;
+                this.connectionStatus = 'connected';
+                localStorage.setItem('thermal_printer_connected', 'true');
+                localStorage.setItem('thermal_printer_name', this.deviceName);
+                localStorage.setItem('thermal_printer_type', 'BLUETOOTH');
+                await $wire.updatePairedDevice('BLUETOOTH', this.deviceName);
+                window.showToast({ type: 'success', title: 'Printer Terhubung', message: 'Berhasil: ' + this.deviceName });
             } catch (err) {
-                console.warn('Bluetooth pairing cancelled or error:', err);
+                if (err && err.message === 'NO_WEB_BLUETOOTH') {
+                    window.showToast({ type: 'error', title: 'Bluetooth Tidak Didukung', message: 'Gunakan APK Android atau Chrome/Edge desktop' });
+                } else if (err && err.message && !err.message.toLowerCase().includes('cancel')) {
+                    window.showToast({ type: 'error', title: 'Gagal Terhubung', message: err.message });
+                }
+                console.warn('BT error:', err);
             } finally {
                 this.isConnecting = false;
             }
         },
 
-        disconnect() {
+        async disconnect() {
+            try { await window.ThermalPrinter.disconnect(); } catch(e) {}
             this.connectionStatus = 'disconnected';
             this.deviceName = '';
             localStorage.removeItem('thermal_printer_connected');
             localStorage.removeItem('thermal_printer_name');
-            @this.updatePairedDevice('SYSTEM', '');
-            window.dispatchEvent(new CustomEvent('toast', {
-                detail: { type: 'info', title: 'Printer Terputus', message: 'Koneksi printer thermal telah direset.' }
-            }));
+            $wire.updatePairedDevice('SYSTEM', '');
+            window.showToast({ type: 'info', title: 'Printer Terputus', message: 'Koneksi printer telah direset.' });
         },
 
         async pairUsb() {
@@ -304,62 +292,44 @@ function thermalPrinterManager() {
                 try {
                     const port = await navigator.serial.requestPort();
                     await port.open({ baudRate: 9600 });
-                    this.deviceName = 'USB Thermal Printer (COM)';
+                    this.deviceName = 'USB Thermal Printer';
                     this.connectionStatus = 'connected';
                     localStorage.setItem('thermal_printer_connected', 'true');
                     localStorage.setItem('thermal_printer_name', this.deviceName);
-                    localStorage.setItem('thermal_printer_type', 'USB');
-                    await @this.updatePairedDevice('USB', this.deviceName);
-                    window.dispatchEvent(new CustomEvent('toast', {
-                        detail: { type: 'success', title: 'USB Terhubung', message: 'Port USB Serial printer siap digunakan.' }
-                    }));
+                    await $wire.updatePairedDevice('USB', this.deviceName);
+                    window.showToast({ type: 'success', title: 'USB Terhubung', message: 'Port serial printer siap.' });
                 } catch (err) {
-                    console.warn('USB port error:', err);
+                    console.warn('USB error:', err);
                 } finally {
                     this.isConnecting = false;
                 }
             } else {
-                alert('Web Serial / USB tidak didukung di browser ini.');
+                window.showToast({ type: 'error', title: 'USB Tidak Didukung', message: 'Web Serial tidak tersedia di browser ini.' });
             }
         },
 
-        testPrint() {
-            const paper = '{{ $printer_paper_size }}';
-            const width = paper === '80mm' ? '300px' : '220px';
-            const printHtml = `
-                <html><head><title>Test Print Struk</title>
-                <style>
-                    @page { size: ${paper} auto; margin: 0; }
-                    body { font-family: 'Courier New', monospace; width: ${width}; margin: 0 auto; padding: 10px; font-size: 12px; color: #000; }
-                    .center { text-align: center; }
-                    .dashed { border-top: 1px dashed #000; margin: 8px 0; }
-                    .bold { font-weight: bold; }
-                    .row { display: flex; justify-content: space-between; }
-                </style></head>
-                <body>
-                    <div class="center bold" style="font-size:14px;">KEE LAUNDRY</div>
-                    <div class="center">Kee Laundry Pusat</div>
-                    <div class="center">WA: 0812-3456-7890</div>
-                    <div class="dashed"></div>
-                    <div class="row"><span>Tanggal:</span><span>${new Date().toLocaleDateString('id-ID')}</span></div>
-                    <div class="row"><span>Status:</span><span class="bold">TEST PRINT OK</span></div>
-                    <div class="row"><span>Printer:</span><span>${this.deviceName || 'Thermal Printer'}</span></div>
-                    <div class="row"><span>Lebar:</span><span>${paper}</span></div>
-                    <div class="dashed"></div>
-                    <div class="center bold">KONEKSI PRINTER BERHASIL!</div>
-                    <div class="center" style="font-size:10px;margin-top:4px;">Kee Laundry ERP v2.0</div>
-                    <br><br>
-                </body></html>
-            `;
-            const win = window.open('', '_blank', 'width=350,height=450');
-            if (win) {
-                win.document.write(printHtml);
-                win.document.close();
-                win.focus();
-                setTimeout(() => { win.print(); win.close(); }, 400);
-            } else {
-                window.print();
+        async testPrint() {
+            const paper = this.$el.dataset.paper || '58mm';
+            try {
+                await window.ThermalPrinter.printTestPage(this.deviceName || 'Thermal Printer', paper);
+                window.showToast({ type: 'success', title: 'Test Print Dikirim', message: 'Cek printer apakah mencetak.' });
+            } catch (err) {
+                if (err && err.message === 'BROWSER_FALLBACK') {
+                    this._openBrowserPrint(paper);
+                } else {
+                    console.warn('Test print error:', err);
+                    this._openBrowserPrint(paper);
+                }
             }
+        },
+
+        _openBrowserPrint(paper) {
+            const w = paper === '80mm' ? '300px' : '220px';
+            const name = this.deviceName || 'Thermal Printer';
+            const html = '<html><head><title>Test Print</title><style>@page{size:' + paper + ' auto;margin:0}body{font-family:Courier New,monospace;width:' + w + ';margin:0 auto;padding:10px;font-size:12px}.c{text-align:center}.b{font-weight:bold}.d{border-top:1px dashed #000;margin:6px 0}.r{display:flex;justify-content:space-between}</style></head><body><div class="c b" style="font-size:14px">KEE LAUNDRY</div><div class="c">Kee Laundry Pusat</div><div class="d"></div><div class="r"><span>Tanggal:</span><span>' + new Date().toLocaleDateString('id-ID') + '</span></div><div class="r"><span>Printer:</span><span>' + name + '</span></div><div class="r"><span>Lebar:</span><span>' + paper + '</span></div><div class="d"></div><div class="c b">PRINTER OK!</div><br><br></body></html>';
+            const win = window.open('', '_blank', 'width=350,height=450');
+            if (win) { win.document.write(html); win.document.close(); win.focus(); setTimeout(function(){ win.print(); win.close(); }, 400); }
+            else { window.print(); }
         }
     };
 }

@@ -1,8 +1,12 @@
 import './bootstrap';
 import Chart from 'chart.js/auto';
+import * as ThermalPrinter from './thermal-printer';
 
 // Expose Chart globally so Alpine.js and Blade components can use it
 window.Chart = Chart;
+
+// Expose ThermalPrinter globally so Alpine.js thermalPrinterManager() can use it
+window.ThermalPrinter = ThermalPrinter;
 
 // ── Global utilities ───────────────────────────────────────────
 
