@@ -1,245 +1,240 @@
-<div class="space-y-5" x-data="printerPage()" x-init="boot()">
+{{-- Printer Thermal — Rebuild Total, Simple & Bersih --}}
+<div class="space-y-4" x-data="printer()">
 
-    {{-- ══ STATUS CARD ═══════════════════════════════════════════════════ --}}
-    <div class="card p-5 sm:p-6 border border-slate-200/90 shadow-xs">
+    {{-- ══ KARTU UTAMA ══════════════════════════════════════════════════ --}}
+    <div class="card p-6 border border-slate-200 shadow-xs space-y-5">
 
         {{-- Header --}}
-        <div class="flex items-start justify-between gap-4 pb-5 border-b border-slate-100">
-            <div class="flex items-center gap-3">
-                <div class="size-11 rounded-2xl flex items-center justify-center shrink-0 border transition-all"
-                     :class="connected ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-slate-50 border-slate-200 text-slate-400'">
-                    <svg class="size-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-slate-800">Printer Thermal POS</h3>
-                    <p class="text-xs text-slate-400 mt-0.5" x-text="connected ? 'Terhubung via ' + connType : 'Belum ada printer terhubung'">Belum ada printer terhubung</p>
-                </div>
-            </div>
-            {{-- Status pill --}}
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border shrink-0 transition-all"
-                 :class="connected ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-100 border-slate-200 text-slate-500'">
-                <span class="size-1.5 rounded-full"
-                      :class="connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
-                <span x-text="connected ? devName : 'Belum Terhubung'">Belum Terhubung</span>
-            </div>
-        </div>
-
-        {{-- Tombol utama --}}
-        <div class="pt-5 space-y-3">
-
-            {{-- SCAN BLUETOOTH --}}
-            <button type="button" @click="scan()"
-                    :disabled="scanning || connected"
-                    class="w-full flex items-center justify-center gap-3 py-4 rounded-2xl font-bold text-sm transition-all
-                           bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white shadow-sm hover:shadow-md
-                           disabled:opacity-50 disabled:cursor-not-allowed">
-                <template x-if="!scanning">
-                    <svg class="size-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.98 0 13.788M12 12h.008v.008H12V12Z"/>
-                    </svg>
-                </template>
-                <template x-if="scanning">
-                    <svg class="size-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                </template>
-                <span x-text="scanning ? 'Sedang Mencari Printer…' : (connected ? '✓ Printer Sudah Terhubung' : 'Scan & Cari Printer Bluetooth')">
-                    Scan &amp; Cari Printer Bluetooth
-                </span>
-            </button>
-
-            {{-- Baris alternatif --}}
-            <div class="flex items-center gap-2 justify-center pt-1">
-                <button type="button" @click="connectUsb()"
-                        class="text-xs font-semibold text-slate-500 hover:text-sky-700 transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-50">
-                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z"/>
-                    </svg>
-                    USB Kabel / Serial
-                </button>
-                <span class="text-slate-200 text-sm">|</span>
-                <button type="button" @click="useSystem()"
-                        class="text-xs font-semibold text-slate-500 hover:text-sky-700 transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-50">
-                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3"/>
-                    </svg>
-                    Dialog Cetak Browser
-                </button>
-                <template x-if="connected">
-                    <span class="text-slate-200 text-sm">|</span>
-                </template>
-                <template x-if="connected">
-                    <button type="button" @click="disconnect()"
-                            class="text-xs font-semibold text-rose-500 hover:text-rose-700 transition-colors flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-rose-50">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
-                        </svg>
-                        Putuskan
-                    </button>
-                </template>
-            </div>
-
-            {{-- Error message --}}
-            <div x-show="errMsg" x-cloak x-transition
-                 class="flex items-start gap-3 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
-                <svg class="size-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+        <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
+            <div class="size-10 rounded-xl flex items-center justify-center shrink-0 border"
+                 :class="status === 'connected'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
+                    : 'bg-slate-50 border-slate-200 text-slate-400'">
+                <svg class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
                 </svg>
-                <span x-text="errMsg"></span>
             </div>
+            <div class="flex-1">
+                <h3 class="text-sm font-bold text-slate-800">Printer Thermal</h3>
+                <p class="text-xs text-slate-400 mt-0.5"
+                   x-text="status === 'connected'
+                       ? '✓ Terhubung: ' + deviceName
+                       : 'Belum ada printer yang terhubung'">
+                    {{ $printer_device_name ? '✓ Tersimpan: '.$printer_device_name : 'Belum ada printer yang terhubung' }}
+                </p>
+            </div>
+            {{-- Badge status --}}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border shrink-0"
+                  :class="status === 'connected'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                      : 'bg-slate-100 border-slate-200 text-slate-500'">
+                <span class="size-1.5 rounded-full"
+                      :class="status === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span x-text="status === 'connected' ? 'Online' : 'Offline'">
+                    {{ $printer_device_name ? 'Offline' : 'Offline' }}
+                </span>
+            </span>
         </div>
 
-        {{-- Connected info --}}
-        <template x-if="connected">
-            <div class="mt-5 flex items-center justify-between p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                <div class="flex items-center gap-3">
-                    <div class="size-9 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600">
-                        <svg class="size-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-emerald-800" x-text="devName"></p>
-                        <p class="text-[11px] text-emerald-600" x-text="connType + ' · Siap mencetak'"></p>
-                    </div>
-                </div>
-                <button type="button" @click="testPrint()"
-                        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-emerald-200 text-emerald-700 text-xs font-bold hover:bg-emerald-50 transition-colors shadow-2xs">
-                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-                    </svg>
-                    Test Print
+        {{-- Tombol SCAN UTAMA --}}
+        <button
+            type="button"
+            @click="openScan()"
+            :disabled="status === 'scanning' || status === 'connecting'"
+            class="w-full min-h-[54px] rounded-2xl font-bold text-sm flex items-center justify-center gap-3
+                   transition-all shadow-sm
+                   disabled:opacity-60 disabled:cursor-wait
+                   focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2"
+            :class="status === 'connected'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-sky-600 hover:bg-sky-700 text-white'"
+        >
+            {{-- Ikon scan --}}
+            <template x-if="status !== 'scanning' && status !== 'connecting'">
+                <svg class="size-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.98 0 13.788M12 12h.008v.008H12V12Z"/>
+                </svg>
+            </template>
+            {{-- Ikon spinner --}}
+            <template x-if="status === 'scanning' || status === 'connecting'">
+                <svg class="size-5 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+            </template>
+            <span x-text="{
+                idle: 'Scan Printer Bluetooth di Sekitar',
+                scanning: 'Sedang Mencari Printer…',
+                connecting: 'Menghubungkan…',
+                connected: '✓ Terhubung — Scan Ulang',
+                error: 'Coba Scan Lagi'
+            }[status] || 'Scan Printer Bluetooth'">
+                Scan Printer Bluetooth di Sekitar
+            </span>
+        </button>
+
+        {{-- Pesan error --}}
+        <div x-show="errMsg" x-cloak x-transition
+             class="flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700">
+            <svg class="size-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+            </svg>
+            <span x-text="errMsg"></span>
+        </div>
+
+        {{-- Link alternatif (kecil, tidak mencolok) --}}
+        <div class="flex items-center justify-center gap-4 text-xs text-slate-400 pt-1">
+            <button type="button" @click="connectUsb()"
+                    class="hover:text-sky-600 transition-colors underline decoration-dashed underline-offset-2">
+                Pakai USB/Serial
+            </button>
+            <span>·</span>
+            <button type="button" @click="useSystemDialog()"
+                    class="hover:text-sky-600 transition-colors underline decoration-dashed underline-offset-2">
+                Cetak via Dialog Browser
+            </button>
+            <template x-if="status === 'connected'">
+                <span>·</span>
+            </template>
+            <template x-if="status === 'connected'">
+                <button type="button" @click="doDisconnect()"
+                        class="hover:text-rose-500 transition-colors underline decoration-dashed underline-offset-2 text-rose-400">
+                    Putuskan
                 </button>
-            </div>
-        </template>
+            </template>
+        </div>
     </div>
 
-    {{-- ══ PENGATURAN KERTAS & AUTO-PRINT ═════════════════════════════════ --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-        {{-- Ukuran Kertas --}}
-        <div class="card p-5 border border-slate-200/90 shadow-xs space-y-4">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h4 class="text-sm font-bold text-slate-800">Ukuran Kertas</h4>
-                    <p class="text-[11px] text-slate-400 mt-0.5">Sesuaikan dengan roll printer Anda</p>
+    {{-- ══ PANEL TERHUBUNG: INFO + TEST PRINT ══════════════════════════ --}}
+    <div x-show="status === 'connected'" x-cloak x-transition
+         class="card p-5 border border-emerald-200 bg-emerald-50/40 shadow-xs">
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="size-10 rounded-xl bg-emerald-100 border border-emerald-200 text-emerald-600 flex items-center justify-center shrink-0">
+                    <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+                    </svg>
                 </div>
-                <span class="text-[10px] font-bold bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full uppercase">
-                    Aktif: {{ $printer_paper_size }}
-                </span>
+                <div>
+                    <p class="text-sm font-bold text-emerald-800" x-text="deviceName">Printer</p>
+                    <p class="text-[11px] text-emerald-600" x-text="connType + ' · Siap mencetak'">Bluetooth · Siap mencetak</p>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                @foreach (['58mm' => 'Roll Mini POS (standar)', '80mm' => 'Roll Kasir Lebar'] as $size => $desc)
-                    <button type="button"
-                            wire:click="$set('printer_paper_size', '{{ $size }}')"
-                            @click="$nextTick(() => @this.savePrinter())"
-                            class="relative flex flex-col items-center justify-center gap-1 p-4 rounded-2xl border-2 transition-all cursor-pointer
-                                   {{ $printer_paper_size === $size
-                                       ? 'border-sky-500 bg-sky-50/60'
-                                       : 'border-slate-200 bg-white hover:border-slate-300' }}">
-                        <span class="text-2xl font-black {{ $printer_paper_size === $size ? 'text-sky-600' : 'text-slate-400' }}">
-                            {{ $size }}
-                        </span>
-                        <span class="text-[10px] text-center {{ $printer_paper_size === $size ? 'text-sky-500' : 'text-slate-400' }}">
-                            {{ $desc }}
-                        </span>
-                        @if ($printer_paper_size === $size)
-                            <span class="absolute top-2 right-2 flex items-center justify-center size-5 rounded-full bg-sky-600 text-white text-[10px] font-bold">✓</span>
-                        @endif
-                    </button>
+            <button type="button" @click="doTestPrint()"
+                    class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-emerald-200
+                           text-sm font-bold text-emerald-700 hover:bg-emerald-100 transition-colors shadow-2xs shrink-0">
+                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+                </svg>
+                Test Print
+            </button>
+        </div>
+    </div>
+
+    {{-- ══ UKURAN KERTAS + AUTO-PRINT ══════════════════════════════════ --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {{-- Ukuran kertas --}}
+        <div class="card p-5 border border-slate-200 shadow-xs space-y-3">
+            <p class="text-sm font-bold text-slate-700">Ukuran Kertas</p>
+            <div class="grid grid-cols-2 gap-2.5">
+                @foreach(['58mm' => ['Standard', 'Printer mini POS'], '80mm' => ['Large', 'Printer meja lebar']] as $s => [$lbl, $sub])
+                <button type="button"
+                        wire:click="$set('printer_paper_size','{{ $s }}')"
+                        @click="$nextTick(() => @this.savePrinter())"
+                        class="relative flex flex-col items-center gap-0.5 py-4 px-3 rounded-2xl border-2 transition-all
+                               {{ $printer_paper_size === $s
+                                  ? 'border-sky-500 bg-sky-50 text-sky-700'
+                                  : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300' }}">
+                    <span class="text-xl font-black">{{ $s }}</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">{{ $lbl }}</span>
+                    <span class="text-[9px] text-center opacity-70">{{ $sub }}</span>
+                    @if($printer_paper_size === $s)
+                    <span class="absolute top-2 right-2 size-5 bg-sky-500 rounded-full text-white text-[10px] flex items-center justify-center font-bold">✓</span>
+                    @endif
+                </button>
                 @endforeach
             </div>
         </div>
 
         {{-- Auto Print --}}
-        <div class="card p-5 border border-slate-200/90 shadow-xs space-y-4">
-            <div>
-                <h4 class="text-sm font-bold text-slate-800">Auto Print Struk</h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">Cetak otomatis setelah order disimpan</p>
+        <div class="card p-5 border border-slate-200 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+                <p class="text-sm font-bold text-slate-700">Auto Print</p>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full
+                             {{ $printer_auto_print ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-500' }}">
+                    {{ $printer_auto_print ? 'Aktif' : 'Nonaktif' }}
+                </span>
             </div>
-            <div class="flex items-center justify-between p-4 rounded-xl border transition-all
+            <div class="flex items-center gap-3 p-4 rounded-xl border transition-all
                         {{ $printer_auto_print ? 'bg-sky-50 border-sky-200' : 'bg-slate-50 border-slate-200' }}">
-                <div class="pr-4">
-                    <p class="text-xs font-semibold text-slate-700">Cetak Saat Proses Order</p>
-                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Nota langsung keluar dari printer saat kasir menekan "Proses Order".</p>
+                <div class="flex-1">
+                    <p class="text-xs font-semibold text-slate-700">Cetak otomatis setelah order disimpan</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Nota langsung keluar saat kasir tekan "Proses Order"</p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <label class="relative inline-flex cursor-pointer shrink-0">
                     <input type="checkbox" wire:model.live="printer_auto_print"
-                           @change="$nextTick(() => @this.savePrinter())"
-                           class="sr-only peer">
-                    <div class="w-11 h-6 bg-slate-300 rounded-full peer
+                           @change="$nextTick(() => @this.savePrinter())" class="sr-only peer">
+                    <div class="w-11 h-6 rounded-full bg-slate-300 transition-all
                                 peer-checked:bg-sky-600
-                                after:content-[''] after:absolute after:top-[2px] after:left-[2px]
-                                after:bg-white after:border after:border-slate-300 after:rounded-full
-                                after:h-5 after:w-5 after:transition-all
-                                peer-checked:after:translate-x-5 peer-checked:after:border-white"></div>
+                                after:absolute after:top-0.5 after:left-0.5
+                                after:bg-white after:rounded-full after:size-5 after:transition-all after:content-['']
+                                peer-checked:after:translate-x-5"></div>
                 </label>
             </div>
-            <p class="text-[11px] text-slate-400">
-                Status: <strong class="{{ $printer_auto_print ? 'text-sky-600' : 'text-slate-500' }}">{{ $printer_auto_print ? 'Aktif — Cetak Otomatis' : 'Nonaktif — Cetak Manual' }}</strong>
-            </p>
         </div>
     </div>
 
-    {{-- ══ PETUNJUK ════════════════════════════════════════════════════════ --}}
-    <div class="rounded-2xl border border-sky-100 bg-sky-50/60 p-4 space-y-3">
-        <p class="text-[11px] font-bold text-sky-800 uppercase tracking-wider">📋 Panduan Menghubungkan Printer</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-sky-900">
-            @foreach ([
-                ['1.', 'Nyalakan printer thermal dan aktifkan Bluetooth di HP/laptop Anda.'],
-                ['2.', 'Buka Pengaturan Bluetooth HP/laptop → cari nama printer → pairing (PIN: 0000 atau 1234).'],
-                ['3.', 'Kembali ke sini dan tekan tombol biru "Scan & Cari Printer Bluetooth".'],
-                ['4.', 'Browser akan menampilkan popup daftar device — pilih nama printer Anda.'],
-                ['5.', 'Tekan "Test Print" untuk memastikan printer berfungsi.'],
-                ['6.', 'Gunakan Chrome atau Edge. Safari & Firefox tidak mendukung Web Bluetooth.'],
-            ] as [$num, $step])
-                <div class="flex gap-2">
-                    <span class="font-bold text-sky-600 shrink-0">{{ $num }}</span>
-                    <span>{{ $step }}</span>
-                </div>
-            @endforeach
-        </div>
+    {{-- ══ PANDUAN SINGKAT ═════════════════════════════════════════════ --}}
+    <div class="rounded-xl border border-sky-100 bg-sky-50 p-4 text-xs text-sky-800 space-y-1.5">
+        <p class="font-bold text-sky-900">💡 Cara menghubungkan printer:</p>
+        <ol class="list-decimal list-inside space-y-1 text-[11px]">
+            <li>Nyalakan printer, aktifkan Bluetooth di HP/laptop</li>
+            <li>Pairing printer di pengaturan Bluetooth HP dulu (PIN: 0000 atau 1234)</li>
+            <li>Klik tombol biru <strong>"Scan Printer"</strong> di atas</li>
+            <li>Pilih nama printer dari daftar yang muncul</li>
+            <li>Tekan <strong>"Test Print"</strong> untuk verifikasi</li>
+        </ol>
+        <p class="text-[10px] text-sky-600 pt-1">✦ Gunakan Google Chrome atau Microsoft Edge · Safari tidak mendukung Web Bluetooth</p>
     </div>
 
-    {{-- ══ MODAL DAFTAR PRINTER — di-teleport ke body ══════════════════ --}}
+    {{-- ══ MODAL DAFTAR PRINTER (x-teleport ke body) ════════════════ --}}
     <template x-teleport="body">
         <div
-            x-show="showModal"
+            x-show="modal"
             x-cloak
-            x-transition:enter="transition ease-out duration-150"
+            class="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-            @click="closeModal()"
-            @keydown.escape.window="closeModal()"
+            @click.self="modal = false; status = (status === 'scanning' ? 'idle' : status)"
+            @keydown.escape.window="modal = false; status = (status === 'scanning' ? 'idle' : status)"
         >
             <div
                 class="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden"
                 x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0 scale-95 translate-y-4"
-                x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                 @click.stop
             >
-                {{-- Header Modal --}}
-                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
                     <div>
                         <h3 class="text-base font-bold text-slate-800">Pilih Printer</h3>
                         <p class="text-xs text-slate-400 mt-0.5"
-                           x-text="devices.length > 0
-                               ? devices.length + ' perangkat ditemukan — tap untuk terhubung'
-                               : 'Mencari printer di sekitar…'"></p>
+                           x-text="devices.length
+                               ? devices.length + ' printer ditemukan'
+                               : (status === 'scanning' ? 'Sedang mencari…' : 'Tap printer untuk konek')">
+                        </p>
                     </div>
+                    {{-- ✕ CLOSE --}}
                     <button
                         type="button"
-                        @click="closeModal()"
-                        class="size-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors"
-                        title="Tutup"
+                        @click="modal = false; if(status === 'scanning' || status === 'connecting') status = 'idle'"
+                        class="size-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center
+                               text-slate-500 hover:text-slate-800 transition-colors"
                     >
                         <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
@@ -247,81 +242,82 @@
                     </button>
                 </div>
 
-                {{-- Isi Modal --}}
-                <div class="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+                {{-- Body --}}
+                <div class="p-4 max-h-[55vh] overflow-y-auto space-y-2">
 
-                    {{-- Loading state --}}
-                    <template x-if="scanning && devices.length === 0">
-                        <div class="py-12 flex flex-col items-center gap-3 text-slate-400">
-                            <svg class="size-8 animate-spin text-sky-500" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                            </svg>
+                    {{-- Scanning spinner --}}
+                    <template x-if="status === 'scanning' && !devices.length">
+                        <div class="py-14 flex flex-col items-center gap-4">
+                            <div class="relative">
+                                <div class="size-16 rounded-full bg-sky-50 border-2 border-sky-200 flex items-center justify-center">
+                                    <svg class="size-7 text-sky-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                </div>
+                                <span class="absolute -top-1 -right-1 size-4 rounded-full bg-sky-400 animate-ping"></span>
+                            </div>
                             <div class="text-center">
-                                <p class="text-sm font-semibold text-slate-600">Mencari Perangkat…</p>
-                                <p class="text-xs mt-1">Pilih printer di popup browser yang muncul</p>
+                                <p class="text-sm font-bold text-slate-700">Memilih Printer…</p>
+                                <p class="text-xs text-slate-400 mt-1">Pilih printer di popup browser yang muncul</p>
                             </div>
                         </div>
                     </template>
 
-                    {{-- Empty state --}}
-                    <template x-if="!scanning && devices.length === 0">
-                        <div class="py-12 flex flex-col items-center gap-3 text-slate-400">
-                            <span class="text-4xl">🖨️</span>
+                    {{-- Connecting --}}
+                    <template x-if="status === 'connecting'">
+                        <div class="py-14 flex flex-col items-center gap-4">
+                            <div class="size-16 rounded-full bg-sky-50 border-2 border-sky-200 flex items-center justify-center">
+                                <svg class="size-7 text-sky-500 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                            </div>
                             <div class="text-center">
-                                <p class="text-sm font-semibold text-slate-600">Tidak ada printer ditemukan</p>
-                                <p class="text-xs mt-1">Pastikan printer sudah di-pairing di Bluetooth HP/laptop</p>
+                                <p class="text-sm font-bold text-slate-700">Menghubungkan…</p>
+                                <p class="text-xs text-slate-400 mt-1" x-text="'Menyambungkan ke ' + (connectingTo || 'printer')"></p>
                             </div>
                         </div>
                     </template>
 
                     {{-- Daftar device --}}
-                    <template x-for="d in devices" :key="d.address || d.name">
-                        <button
-                            type="button"
-                            :disabled="connecting"
-                            @click="connect(d)"
-                            class="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/80
-                                   hover:bg-sky-50 hover:border-sky-200 transition-all active:scale-[0.98] text-left
-                                   disabled:opacity-60 disabled:cursor-wait group"
-                        >
-                            <div class="size-11 rounded-2xl bg-sky-50 border border-sky-100 text-sky-600
-                                        group-hover:bg-sky-100 flex items-center justify-center shrink-0 transition-colors">
-                                <svg class="size-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
-                                </svg>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="font-bold text-slate-800 truncate text-sm" x-text="d.name || 'Thermal Printer'"></p>
-                                <p class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="d.address || d.type || 'Bluetooth'"></p>
-                            </div>
-                            <div class="shrink-0">
-                                <template x-if="!connecting">
-                                    <svg class="size-5 text-slate-300 group-hover:text-sky-400 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <template x-if="devices.length && status !== 'connecting'">
+                        <div class="space-y-2">
+                            <template x-for="d in devices" :key="d.id">
+                                <button
+                                    type="button"
+                                    @click="doConnect(d)"
+                                    class="w-full flex items-center gap-3.5 p-4 rounded-2xl border border-slate-100
+                                           bg-slate-50 hover:bg-sky-50 hover:border-sky-200
+                                           transition-all active:scale-[0.98] text-left group"
+                                >
+                                    <div class="size-11 rounded-xl bg-white border border-slate-200
+                                                group-hover:bg-sky-100 group-hover:border-sky-200
+                                                flex items-center justify-center shrink-0 transition-colors text-slate-400 group-hover:text-sky-600">
+                                        <svg class="size-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-bold text-slate-800 text-sm truncate" x-text="d.label"></p>
+                                        <p class="text-[10px] text-slate-400 font-mono mt-0.5" x-text="d.sub || 'Bluetooth'"></p>
+                                    </div>
+                                    <svg class="size-4 text-slate-300 group-hover:text-sky-400 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="m9 18 6-6-6-6"/>
                                     </svg>
-                                </template>
-                                <template x-if="connecting">
-                                    <svg class="size-4 animate-spin text-sky-500" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                                    </svg>
-                                </template>
-                            </div>
-                        </button>
+                                </button>
+                            </template>
+                        </div>
                     </template>
                 </div>
 
-                {{-- Footer Modal --}}
-                <div class="px-5 py-3.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-3">
-                    <p class="text-[11px] text-slate-400">Tidak ada dalam daftar? Pastikan printer sudah di-pairing di Bluetooth.</p>
-                    <button type="button" @click="scan()"
-                            :disabled="scanning"
-                            class="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200
-                                   text-xs font-bold text-slate-600 hover:text-sky-600 hover:border-sky-200 transition-all disabled:opacity-50">
-                        <svg class="size-3.5" :class="scanning ? 'animate-spin' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15"/>
-                        </svg>
+                {{-- Footer --}}
+                <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <p class="text-[11px] text-slate-400 leading-relaxed">Tidak ada? Pairing dulu di <strong>Pengaturan Bluetooth</strong> HP/laptop.</p>
+                    <button type="button" @click="openScan()"
+                            :disabled="status === 'scanning' || status === 'connecting'"
+                            class="shrink-0 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold
+                                   text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all disabled:opacity-50">
                         Scan Ulang
                     </button>
                 </div>
@@ -330,97 +326,109 @@
     </template>
 </div>
 
-{{-- ══ ALPINE COMPONENT ════════════════════════════════════════════════════ --}}
+{{-- ══ ALPINE LOGIC — BERSIH, MINIMAL, TIDAK ADA DEPENDENCY GLOBAL ════════ --}}
 <script>
-function printerPage() {
+function printer() {
     return {
-        // ── Reactive state ──────────────────────────────────────────────────
-        connected:  false,
-        connecting: false,
-        scanning:   false,
-        showModal:  false,
-        devName:    '',
-        connType:   '',
-        devices:    [],
-        errMsg:     '',
+        // ── State ─────────────────────────────────────────────────────────────
+        status:       'idle',     // idle | scanning | connecting | connected | error
+        modal:        false,
+        devices:      [],
+        deviceName:   '',
+        connType:     '',
+        connectingTo: '',
+        errMsg:       '',
+        _gatt:        null,       // GATT server reference
+        _char:        null,       // Write characteristic reference
+        _rawDevice:   null,       // BluetoothDevice reference
 
-        // ── Boot: baca localStorage + sinkron dengan singleton ──────────────
-        boot() {
-            this.connected = localStorage.getItem('tp_connected') === 'true';
-            this.devName   = localStorage.getItem('tp_name')  || '{{ $printer_device_name ?? '' }}';
-            this.connType  = localStorage.getItem('tp_type')  || '{{ $printer_type ?? 'SYSTEM' }}';
+        // ── Init: baca state tersimpan dari localStorage ───────────────────────
+        init() {
+            const saved = localStorage.getItem('kl_printer');
+            if (saved) {
+                try {
+                    const p      = JSON.parse(saved);
+                    this.deviceName = p.name  || '';
+                    this.connType   = p.type  || '';
+                    // Hanya set connected jika memang ada name tersimpan
+                    if (p.name) this.status = 'connected';
+                } catch(_) {}
+            }
 
-            // Sinkron dari singleton thermalPrinter (jika sudah auto-reconnect)
+            // Jika singleton thermalPrinter sudah connect (auto-reconnect), sinkron
             const tp = window.thermalPrinter;
-            if (tp) {
-                if (tp.connected) {
-                    this.connected = true;
-                    if (tp.device?.name) this.devName = tp.device.name;
-                }
-                tp.addEventListener('connection-changed', (e) => {
-                    this.connected = !!e.detail;
-                    if (!e.detail) { this.devName = ''; this.connType = ''; }
-                });
+            if (tp?.connected && tp.device?.name) {
+                this.deviceName = tp.device.name;
+                this.connType   = 'Bluetooth';
+                this.status     = 'connected';
+                this._char      = tp.characteristic;
             }
         },
 
-        // ── SCAN ─────────────────────────────────────────────────────────────
-        async scan() {
+        // ── SCAN: titik masuk utama ────────────────────────────────────────────
+        async openScan() {
             this.errMsg = '';
-            const tp = window.thermalPrinter;
 
-            // ── Android APK (Native Bridge) ──────────────────────────────────
+            // ── Android APK Native Bridge ────────────────────────────────────
+            const tp = window.thermalPrinter;
             if (tp?.isAndroidApp?.()) {
-                this.scanning = true;
-                this.devices  = [];
-                this.showModal = true;
+                this.status = 'scanning';
+                this.modal  = true;
+                this.devices = [];
                 try {
                     const list = await tp.scan();
-                    this.devices = list || [];
-                } catch (e) {
-                    this.errMsg = 'Scan gagal: ' + (e.message || String(e));
-                    this.showModal = false;
-                } finally {
-                    this.scanning = false;
+                    this.devices = (list || []).map(d => ({
+                        id:    d.address,
+                        label: d.name || 'Printer',
+                        sub:   d.address,
+                        raw:   d,
+                        isNative: true,
+                    }));
+                    this.status = 'idle';
+                } catch(e) {
+                    this.status = 'error';
+                    this.errMsg = 'Scan gagal: ' + (e.message || e);
+                    this.modal  = false;
                 }
                 return;
             }
 
-            // ── Validasi Web Bluetooth support ───────────────────────────────
+            // ── Cek Web Bluetooth support ────────────────────────────────────
             if (!('bluetooth' in navigator)) {
-                const onHttp = location.protocol === 'http:'
-                    && location.hostname !== 'localhost'
-                    && location.hostname !== '127.0.0.1';
-                this.errMsg = onHttp
-                    ? 'Web Bluetooth tidak aktif di HTTP. Buka halaman ini via HTTPS atau localhost.'
-                    : 'Browser tidak mendukung Web Bluetooth. Gunakan Chrome atau Edge versi terbaru.';
+                this.status = 'error';
+                const isHttp = location.protocol === 'http:'
+                    && !['localhost','127.0.0.1'].includes(location.hostname);
+                this.errMsg = isHttp
+                    ? 'Web Bluetooth tidak aktif di HTTP. Buka via HTTPS atau di localhost.'
+                    : 'Browser tidak mendukung Web Bluetooth. Gunakan Chrome atau Edge terbaru.';
                 return;
             }
 
-            // ── Cek previously-paired devices dulu (tanpa popup baru) ────────
+            // ── Cek previously-paired devices (tanpa popup) ──────────────────
             if (navigator.bluetooth.getDevices) {
                 try {
                     const paired = await navigator.bluetooth.getDevices();
                     if (paired.length > 0) {
                         this.devices = paired.map(d => ({
-                            name:        d.name || 'Printer',
-                            address:     d.id,
-                            type:        'bluetooth',
-                            isWebDevice: true,
-                            rawDevice:   d,
+                            id:    d.id,
+                            label: d.name || 'Printer Bluetooth',
+                            sub:   d.id.substring(0, 17) || 'Bluetooth',
+                            raw:   d,
+                            isPaired: true,
                         }));
-                        this.showModal = true;
+                        this.status = 'idle';
+                        this.modal  = true;
                         return;
                     }
-                } catch (_) { /* lanjut ke picker */ }
+                } catch(_) {}
             }
 
-            // ── Buka native browser Bluetooth picker ─────────────────────────
-            this.scanning  = true;
-            this.showModal = true;
-            this.devices   = [];
+            // ── Buka Bluetooth picker bawaan browser ─────────────────────────
+            this.status  = 'scanning';
+            this.modal   = true;
+            this.devices = [];
             try {
-                const device = await navigator.bluetooth.requestDevice({
+                const dev = await navigator.bluetooth.requestDevice({
                     acceptAllDevices: true,
                     optionalServices: [
                         '000018f0-0000-1000-8000-00805f9b34fb',
@@ -429,172 +437,237 @@ function printerPage() {
                         'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
                         '0000ff00-0000-1000-8000-00805f9b34fb',
                         '00001101-0000-1000-8000-00805f9b34fb',
-                        '00001800-0000-1000-8000-00805f9b34fb',
-                        '00001801-0000-1000-8000-00805f9b34fb',
                     ],
                 });
-                // User sudah pilih device dari picker browser → langsung connect
-                this.devices   = [{ name: device.name || 'Printer', address: device.id, type: 'bluetooth', rawDevice: device, isWebDevice: true }];
-                this.scanning  = false;
-                await this.connect(this.devices[0]);
-            } catch (e) {
-                this.scanning  = false;
-                this.showModal = false;
-                // User cancel = NotFoundError atau pesan 'cancelled' → tidak tampilkan error
+                // User sudah pilih → langsung connect
+                this.status = 'idle';
+                await this.doConnect({ id: dev.id, label: dev.name || 'Printer', raw: dev });
+            } catch(e) {
+                this.status = 'idle';
+                this.modal  = false;
                 if (e.name !== 'NotFoundError' && !String(e).toLowerCase().includes('cancel')) {
                     this.errMsg = e.message || String(e);
+                    this.status = 'error';
                 }
             }
         },
 
-        // ── CONNECT ke device spesifik ────────────────────────────────────────
-        async connect(device) {
-            this.connecting = true;
-            this.errMsg     = '';
+        // ── CONNECT ke device yang dipilih ────────────────────────────────────
+        async doConnect(device) {
+            this.status       = 'connecting';
+            this.connectingTo = device.label;
+            this.errMsg       = '';
+
             try {
-                const tp = window.thermalPrinter;
-                if (tp) {
-                    await tp.connect(device);
+                // ── Android native ────────────────────────────────────────────
+                if (device.raw?.isNative || device.isNative) {
+                    const res = window.AndroidInterface?.connectBluetoothPrinter?.(device.raw?.address || device.id);
+                    if (res === 'SUCCESS') {
+                        await this._saveConnected(device.label, 'Bluetooth');
+                        return;
+                    }
+                    throw new Error(res || 'Koneksi gagal');
                 }
-                await this._onConnected(device.name || 'Printer Bluetooth', 'BLUETOOTH');
-                this.closeModal();
-            } catch (e) {
-                this.errMsg    = 'Gagal terhubung: ' + (e.message || String(e));
-                this.showModal = false;
-            } finally {
-                this.connecting = false;
+
+                // ── Web Bluetooth GATT ────────────────────────────────────────
+                const rawDev = device.raw;
+                if (!rawDev) throw new Error('Device tidak valid');
+
+                // Disconnect stale jika perlu
+                if (rawDev.gatt?.connected) {
+                    try { rawDev.gatt.disconnect(); } catch(_) {}
+                    await new Promise(r => setTimeout(r, 300));
+                }
+
+                const server = await rawDev.gatt.connect();
+                this._gatt   = server;
+
+                // Cari service printer yang valid
+                const serviceUUIDs = [
+                    '000018f0-0000-1000-8000-00805f9b34fb',
+                    '0000ffe0-0000-1000-8000-00805f9b34fb',
+                    '49535343-fe7d-4ae5-8fa9-9fafd205e455',
+                    'e7810a71-73ae-499d-8c15-faa9aef0c3f2',
+                    '0000ff00-0000-1000-8000-00805f9b34fb',
+                    '00001101-0000-1000-8000-00805f9b34fb',
+                ];
+
+                let char = null;
+
+                for (const uuid of serviceUUIDs) {
+                    try {
+                        const svc   = await server.getPrimaryService(uuid);
+                        const chars = await svc.getCharacteristics();
+                        char = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                        if (char) break;
+                    } catch(_) {}
+                }
+
+                // Fallback: cari semua service
+                if (!char) {
+                    try {
+                        const allSvcs = await server.getPrimaryServices();
+                        for (const svc of allSvcs) {
+                            try {
+                                const chars = await svc.getCharacteristics();
+                                char = chars.find(c => c.properties.write || c.properties.writeWithoutResponse);
+                                if (char) break;
+                            } catch(_) {}
+                        }
+                    } catch(_) {}
+                }
+
+                if (!char) throw new Error('Printer tidak kompatibel. Pastikan printer mendukung ESC/POS BLE.');
+
+                this._char      = char;
+                this._rawDevice = rawDev;
+
+                // Auto-reconnect jika putus tidak disengaja
+                rawDev.addEventListener('gattserverdisconnected', () => {
+                    if (this.status === 'connected') {
+                        this.status = 'idle';
+                        this._char  = null;
+                    }
+                });
+
+                await this._saveConnected(rawDev.name || device.label, 'Bluetooth');
+
+            } catch(e) {
+                this.status = 'error';
+                this.modal  = false;
+                this.errMsg = e.message || String(e);
             }
         },
 
-        // ── USB Serial ────────────────────────────────────────────────────────
+        // ── USB / Serial ───────────────────────────────────────────────────────
         async connectUsb() {
+            this.errMsg = '';
             if (!('serial' in navigator)) {
-                this.errMsg = 'USB Serial tidak didukung. Gunakan Chrome atau Edge desktop via HTTPS/localhost.';
+                this.errMsg = 'USB Serial tidak didukung browser ini. Gunakan Chrome/Edge desktop.';
                 return;
             }
-            this.errMsg = '';
             try {
                 const port = await navigator.serial.requestPort();
                 await port.open({ baudRate: 9600 });
-                window._printerSerialPort = port;
-                await this._onConnected('USB Thermal Printer', 'USB');
-            } catch (e) {
-                if (!String(e).toLowerCase().includes('cancel') && e.name !== 'NotFoundError') {
-                    this.errMsg = 'USB gagal: ' + (e.message || String(e));
+                window._kl_serial = port;
+                await this._saveConnected('USB Printer', 'USB/Serial');
+            } catch(e) {
+                if (e.name !== 'NotFoundError' && !String(e).toLowerCase().includes('cancel')) {
+                    this.errMsg = 'USB gagal: ' + (e.message || e);
                 }
             }
         },
 
-        // ── Gunakan dialog print browser ──────────────────────────────────────
-        async useSystem() {
-            this.connected = false;
-            this.devName   = 'Dialog Browser';
-            this.connType  = 'SYSTEM';
-            localStorage.setItem('tp_type', 'SYSTEM');
-            localStorage.removeItem('tp_connected');
-            localStorage.removeItem('tp_name');
-            await @this.updatePairedDevice('SYSTEM', '');
-            this._toast('info', 'Mode Browser', 'Struk akan dicetak lewat dialog cetak browser.');
+        // ── System dialog print ────────────────────────────────────────────────
+        async useSystemDialog() {
+            await this._saveConnected('Dialog Browser', 'SYSTEM');
         },
 
-        // ── Disconnect ────────────────────────────────────────────────────────
-        async disconnect() {
-            try { await window.thermalPrinter?.disconnect(); } catch (_) {}
-            this.connected = false;
-            this.devName   = '';
-            this.connType  = '';
-            this.devices   = [];
-            localStorage.removeItem('tp_connected');
-            localStorage.removeItem('tp_name');
-            localStorage.removeItem('tp_type');
+        // ── Disconnect ─────────────────────────────────────────────────────────
+        async doDisconnect() {
+            try {
+                if (this._gatt?.connected) this._gatt.disconnect();
+                if (window.thermalPrinter?.connected) window.thermalPrinter.disconnect();
+            } catch(_) {}
+            this._gatt    = null;
+            this._char    = null;
+            this.status   = 'idle';
+            this.deviceName = '';
+            this.connType   = '';
+            localStorage.removeItem('kl_printer');
             await @this.updatePairedDevice('SYSTEM', '');
-            this._toast('info', 'Terputus', 'Koneksi printer telah dilepas.');
+            window.showToast?.({ type: 'info', title: 'Terputus', message: 'Printer telah dilepas.' });
         },
 
-        // ── Test Print ────────────────────────────────────────────────────────
-        async testPrint() {
+        // ── Test Print ─────────────────────────────────────────────────────────
+        async doTestPrint() {
             const paper = '{{ $printer_paper_size ?? '58mm' }}';
-            const tp    = window.thermalPrinter;
+            const cols  = paper === '80mm' ? 48 : 32;
+            const sep   = '-'.repeat(cols);
+            const now   = new Date().toLocaleString('id-ID');
 
             // Android native
-            if (tp?.isAndroidApp?.() && tp.connected) {
+            if (window.thermalPrinter?.isAndroidApp?.() && window.AndroidInterface) {
                 try {
-                    const cols = paper === '80mm' ? 48 : 32;
-                    const sep  = '-'.repeat(cols);
                     window.AndroidInterface.printFormattedText(
-                        `[C]<b>KEE LAUNDRY</b>\n[C]Test Print OK\n[C]${sep}\n` +
-                        `[L]Tanggal: ${new Date().toLocaleString('id-ID')}\n` +
-                        `[L]Printer: ${this.devName}\n[L]Lebar  : ${paper}\n` +
-                        `[C]${sep}\n[C]<b>PRINTER BERHASIL!</b>\n\n\n`
+                        `[C]<b>KEE LAUNDRY</b>\n[C]--- TEST PRINT ---\n[C]${sep}\n` +
+                        `[L]Waktu  : ${now}\n[L]Printer: ${this.deviceName}\n[L]Lebar  : ${paper}\n` +
+                        `[C]${sep}\n[C]<b>PRINTER OK ✓</b>\n\n\n`
                     );
-                    this._toast('success', 'Test Print Terkirim', 'Cek struk fisik pada printer.');
+                    window.showToast?.({ type: 'success', title: 'Test Print OK', message: 'Cek struk yang keluar.' });
                     return;
-                } catch (_) {}
+                } catch(_) {}
             }
 
             // Web Bluetooth
-            if (tp?.connected && tp.characteristic) {
+            if (this._char) {
                 try {
-                    await tp.testPrint();
-                    this._toast('success', 'Test Print Terkirim', 'Cek struk fisik pada printer.');
+                    const enc  = new TextEncoder();
+                    const ESC  = 0x1B;
+                    const GS   = 0x1D;
+                    const cmd  = [];
+                    const push = (arr) => arr.forEach(b => cmd.push(b));
+
+                    push([ESC, 0x40]);                      // Init printer
+                    push([ESC, 0x61, 0x01]);                // Center align
+                    push([ESC, 0x45, 0x01, GS, 0x21, 0x01]); // Bold + double height
+                    push([...enc.encode('KEE LAUNDRY\n')]);
+                    push([GS, 0x21, 0x00, ESC, 0x45, 0x00]); // Reset size
+                    push([...enc.encode('--- TEST PRINT ---\n')]);
+                    push([...enc.encode(sep + '\n')]);
+                    push([ESC, 0x61, 0x00]);                // Left align
+                    push([...enc.encode(`Waktu  : ${now}\n`)]);
+                    push([...enc.encode(`Printer: ${this.deviceName}\n`)]);
+                    push([...enc.encode(`Lebar  : ${paper}\n`)]);
+                    push([...enc.encode(sep + '\n')]);
+                    push([ESC, 0x61, 0x01]);
+                    push([ESC, 0x45, 0x01]);
+                    push([...enc.encode('PRINTER OK ✓\n')]);
+                    push([ESC, 0x45, 0x00]);
+                    push([0x0A, 0x0A]);
+                    push([GS, 0x56, 0x00]);                 // Cut paper
+
+                    const data  = new Uint8Array(cmd);
+                    const chunk = 512;
+                    for (let i = 0; i < data.length; i += chunk) {
+                        await this._char.writeValue(data.slice(i, i + chunk));
+                        await new Promise(r => setTimeout(r, 60));
+                    }
+                    window.showToast?.({ type: 'success', title: 'Test Print OK', message: 'Cek struk yang keluar.' });
                     return;
-                } catch (e) {
-                    this._toast('error', 'Print Gagal', e.message || String(e));
+                } catch(e) {
+                    this.errMsg = 'Print gagal: ' + (e.message || e);
                     return;
                 }
             }
 
             // Fallback: dialog browser
-            this._browserPrint(paper);
-        },
-
-        // ── Browser print fallback ────────────────────────────────────────────
-        _browserPrint(paper) {
-            const w   = paper === '80mm' ? '302px' : '218px';
-            const now = new Date().toLocaleString('id-ID');
-            const html = `<!DOCTYPE html><html><head><title>Test Print</title>
+            const w   = paper === '80mm' ? '300px' : '220px';
+            const win = window.open('', '_blank', `width=${paper === '80mm' ? 380 : 300},height=430`);
+            if (!win) { this.errMsg = 'Popup diblokir. Izinkan popup di browser.'; return; }
+            win.document.write(`<!DOCTYPE html><html><head><title>Test Print</title>
 <style>@page{size:${paper} auto;margin:4mm}body{font-family:Courier New,monospace;width:${w};margin:0 auto;font-size:11px;line-height:1.5;color:#000}.c{text-align:center}.b{font-weight:bold}hr{border:none;border-top:1px dashed #000;margin:4px 0}</style>
 </head><body>
-<div class="c b" style="font-size:14px">KEE LAUNDRY</div>
-<div class="c">Test Print — Printer OK</div><hr>
-<div>Tanggal : ${now}</div><div>Lebar   : ${paper}</div>
-<div>Status  : <b>BERHASIL ✓</b></div><hr>
-<div class="c b">Terima Kasih!</div><br><br></body></html>`;
-            const win = window.open('', '_blank', `width=${paper === '80mm' ? 380 : 300},height=430`);
-            if (win) {
-                win.document.write(html);
-                win.document.close();
-                win.focus();
-                setTimeout(() => { win.print(); setTimeout(() => win.close(), 1200); }, 400);
-            } else {
-                this.errMsg = 'Popup diblokir browser. Izinkan popup untuk mencetak.';
-            }
+<div class="c b" style="font-size:13px">KEE LAUNDRY</div>
+<div class="c">--- TEST PRINT ---</div><hr>
+<div>Waktu  : ${now}</div><div>Lebar  : ${paper}</div>
+<div>Status : <b>PRINTER OK ✓</b></div><hr>
+<div class="c">Terima Kasih</div><br><br></body></html>`);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); setTimeout(() => win.close(), 1200); }, 400);
         },
 
-        // ── Tutup modal ────────────────────────────────────────────────────────
-        closeModal() {
-            this.showModal  = false;
-            this.scanning   = false;
-            this.connecting = false;
-        },
-
-        // ── Setelah connected berhasil ─────────────────────────────────────────
-        async _onConnected(name, type) {
-            this.connected = true;
-            this.devName   = name;
-            this.connType  = type;
-            localStorage.setItem('tp_connected', 'true');
-            localStorage.setItem('tp_name', name);
-            localStorage.setItem('tp_type', type);
+        // ── Helper: simpan state setelah connect berhasil ──────────────────────
+        async _saveConnected(name, type) {
+            this.status     = 'connected';
+            this.deviceName = name;
+            this.connType   = type;
+            this.modal      = false;
+            this.errMsg     = '';
+            localStorage.setItem('kl_printer', JSON.stringify({ name, type }));
             await @this.updatePairedDevice(type, name);
-            this._toast('success', 'Printer Terhubung! 🖨️', name + ' siap mencetak struk.');
-        },
-
-        // ── Toast helper ────────────────────────────────────────────────────────
-        _toast(type, title, message) {
-            window.showToast
-                ? window.showToast({ type, title, message })
-                : console.info('[printer]', type, title, message);
+            window.showToast?.({ type: 'success', title: 'Printer Terhubung! 🖨️', message: name + ' siap mencetak.' });
         },
     };
 }
