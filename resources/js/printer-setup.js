@@ -25,13 +25,12 @@ export function printerSetup() {
         _rawDevice: null,
         _wire:      null,
 
-        // ── Deteksi APK — dicek saat runtime (bukan saat init) ────────────────
+        // ── Deteksi APK — HANYA true jika AndroidInterface benar-benar ada ──────
+        // Tidak pakai window.Capacitor karena Capacitor ada di web browser juga
+        // via livewire bundle. Satu-satunya indikator pasti = AndroidInterface.
         _isApk() {
-            // Capacitor inject AndroidInterface ke WebView setelah DOMContentLoaded
-            // Cek saat user klik, bukan saat init
             return typeof window.AndroidInterface !== 'undefined'
-                || typeof window.Capacitor !== 'undefined'
-                || (typeof window.Capacitor === 'object' && window.Capacitor?.isNativePlatform?.());
+                && typeof window.AndroidInterface.scanPrinters === 'function';
         },
 
         // ── Init ──────────────────────────────────────────────────────────────
@@ -56,19 +55,31 @@ export function printerSetup() {
         async openScan() {
             this.errMsg = '';
 
-            // ── PATH 1: Android APK (AndroidInterface tersedia) ───────────────
+            // ── PATH 1: Android APK ──────────────────────────────────────────
             if (this._isApk()) {
                 this.status  = 'scanning';
                 this.modal   = true;
                 this.devices = [];
 
                 try {
-                    // scanPrinters() adalah synchronous JavascriptInterface call
-                    // Wrap di setTimeout agar UI sempat render dulu
-                    await new Promise(r => setTimeout(r, 100));
+                    // scanPrinters() adalah synchronous Java bridge call
+                    // Beri waktu 150ms agar UI sempat render loading state
+                    await new Promise(r => setTimeout(r, 150));
+
+                    // Double-check karena timing bisa berubah
+                    if (typeof window.AndroidInterface?.scanPrinters !== 'function') {
+                        throw new Error('AndroidInterface.scanPrinters tidak tersedia. Coba restart APK.');
+                    }
 
                     const raw  = window.AndroidInterface.scanPrinters();
                     const list = JSON.parse(raw || '[]');
+
+                    if (list.length === 0) {
+                        this.errMsg = 'Tidak ada printer ditemukan. Pastikan printer menyala dan sudah di-pairing di Bluetooth HP.';
+                        this.status = 'error';
+                        this.modal  = false;
+                        return;
+                    }
 
                     this.devices = list.map((d, i) => ({
                         id:       d.address || String(i),
