@@ -1,31 +1,27 @@
 import './bootstrap';
 import Chart from 'chart.js/auto';
 import thermalPrinter from './thermal-printer';
+import { printerSetup } from './printer-setup';
 
-// Expose Chart globally
+// ── Chart ──────────────────────────────────────────────────────────────────
 window.Chart = Chart;
 
-// Expose printer singleton globally — dipakai oleh Alpine.js di blade
+// ── Printer singleton (kompatibilitas modul lama) ──────────────────────────
 window.thermalPrinter = thermalPrinter;
-
-// Listen status perubahan koneksi agar bisa dipakai secara global
 thermalPrinter.addEventListener('connection-changed', (e) => {
     window.dispatchEvent(new CustomEvent('printer-status-changed', { detail: e.detail }));
 });
 
-// ── Global utilities ───────────────────────────────────────────
+// ── Daftarkan Alpine.data sebelum Alpine start ─────────────────────────────
+// Alpine di-bundle di dalam Livewire — gunakan event alpine:init
+document.addEventListener('alpine:init', () => {
+    Alpine.data('printerSetup', printerSetup);
+});
 
-/**
- * Format number as Indonesian Rupiah.
- * Usage: formatRp(35000) → "Rp 35.000"
- */
+// ── Global helpers ─────────────────────────────────────────────────────────
 window.formatRp = (value) =>
     'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(value));
 
-/**
- * Dispatch a toast notification from any JS context.
- * Usage: showToast({ type: 'success', title: 'Berhasil', message: 'Data tersimpan' })
- */
 window.showToast = ({ type = 'info', title = '', message = '', duration = 4000 } = {}) => {
     window.dispatchEvent(new CustomEvent('toast', { detail: { type, title, message, duration } }));
 };
