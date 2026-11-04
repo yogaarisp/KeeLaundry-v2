@@ -13,7 +13,13 @@ class BranchSettings extends Component
     use WithFileUploads;
 
     // ── Active tab ─────────────────────────────────────────────────
-    public string $activeTab = 'profile'; // profile | receipt | whatsapp
+    public string $activeTab = 'profile'; // profile | receipt | printer | whatsapp
+
+    // ── Printer Thermal fields ─────────────────────────────────────
+    public string $printer_type        = 'SYSTEM'; // BLUETOOTH | USB | SYSTEM
+    public string $printer_paper_size  = '58mm';
+    public bool   $printer_auto_print  = false;
+    public string $printer_device_name = '';
 
     // ── Branch Profile fields ──────────────────────────────────────
     public string $code               = '';
@@ -66,6 +72,10 @@ class BranchSettings extends Component
         $this->target_hpp_per_kg   = $branch->target_hpp_per_kg;
         $this->is_active           = (bool) $branch->is_active;
         $this->receipt_footer      = $branch->receipt_footer ?? '';
+        $this->printer_type        = $branch->printer_type ?? 'SYSTEM';
+        $this->printer_paper_size  = $branch->printer_paper_size ?? '58mm';
+        $this->printer_auto_print  = (bool) ($branch->printer_auto_print ?? false);
+        $this->printer_device_name = $branch->printer_device_name ?? '';
         $this->wa_template_ready   = $branch->wa_template_ready  ?? $this->defaultWaReady();
         $this->wa_template_done    = $branch->wa_template_done   ?? $this->defaultWaDone();
         $this->wa_template_promo   = $branch->wa_template_promo  ?? $this->defaultWaPromo();
@@ -188,6 +198,42 @@ class BranchSettings extends Component
 
         unset($this->branch);
         $this->dispatch('notify', ['type' => 'success', 'title' => 'Format Struk Tersimpan', 'message' => 'Footer struk thermal berhasil diperbarui.']);
+    }
+
+    // ── Save: Printer Thermal ──────────────────────────────────────
+
+    public function savePrinter(): void
+    {
+        $this->validate([
+            'printer_type'       => ['required', 'in:BLUETOOTH,USB,SYSTEM'],
+            'printer_paper_size' => ['required', 'in:58mm,80mm'],
+            'printer_auto_print' => ['boolean'],
+        ]);
+
+        Branch::where('id', session('active_branch_id', 1))->update([
+            'printer_type'        => $this->printer_type,
+            'printer_paper_size'  => $this->printer_paper_size,
+            'printer_auto_print'  => $this->printer_auto_print,
+            'printer_device_name' => trim($this->printer_device_name) ?: null,
+        ]);
+
+        unset($this->branch);
+
+        $this->dispatch('notify', [
+            'type'    => 'success',
+            'title'   => 'Pengaturan Printer Disimpan',
+            'message' => 'Konfigurasi printer thermal berhasil diperbarui.',
+        ]);
+    }
+
+    /**
+     * Dipanggil dari JavaScript setelah printer berhasil terhubung.
+     */
+    public function updatePairedDevice(string $type, string $deviceName): void
+    {
+        $this->printer_type        = $type;
+        $this->printer_device_name = $deviceName;
+        $this->savePrinter();
     }
 
     // ── Save: WhatsApp Templates ───────────────────────────────────

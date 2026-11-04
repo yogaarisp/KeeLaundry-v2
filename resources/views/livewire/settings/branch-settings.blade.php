@@ -21,6 +21,7 @@
     $tabs = [
         'profile'  => ['icon' => '🏪', 'short' => 'Profil',  'label' => 'Profil Toko'],
         'receipt'  => ['icon' => '🧾', 'short' => 'Struk',   'label' => 'Format Struk'],
+        'printer'  => ['icon' => '🖨️', 'short' => 'Printer', 'label' => 'Printer Thermal'],
         'whatsapp' => ['icon' => '💬', 'short' => 'WA',      'label' => 'Template WA'],
     ];
     @endphp
@@ -522,6 +523,10 @@
 </div>
 @endif
 
+{{-- ══ TAB: PRINTER THERMAL ════════════════════════════════════════ --}}
+@if ($activeTab === 'printer')
+    @include('livewire.settings._printer-settings')
+@endif
 {{-- ══ TAB: TEMPLATE WHATSAPP ══════════════════════════════════════ --}}
 @if ($activeTab === 'whatsapp')
 <div class="space-y-5">
