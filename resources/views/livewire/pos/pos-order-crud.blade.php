@@ -168,68 +168,24 @@
                 </div>
             </div>
 
-            {{-- ── Jenis Layanan: Cuci / Setrika Toggle ─────────────────── --}}
+            {{-- ── Jenis Layanan: Cuci+Setrika / Cuci Saja / Setrika Saja ─── --}}
             <div>
                 <label class="form-label">Jenis Layanan</label>
-                <div class="grid grid-cols-2 gap-2.5 mt-1">
-                    {{-- Toggle: Cuci --}}
-                    <label class="relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none
-                                  {{ $includeWash ? 'border-sky-400 bg-sky-50/60' : 'border-slate-200 bg-white opacity-70' }}">
-                        <input type="checkbox" wire:model.live="includeWash" class="sr-only">
-                        {{-- Ikon Cuci --}}
-                        <div class="shrink-0 size-8 rounded-lg flex items-center justify-center
-                                    {{ $includeWash ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-400' }}">
-                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5c0-1.657 3.134-3 7-3s7 1.343 7 3m0 0v4.5A2.25 2.25 0 0 1 15.5 20h-7a2.25 2.25 0 0 1-2.25-2.25V13.5m11.5 0A2.25 2.25 0 0 0 15.5 11.25h-7A2.25 2.25 0 0 0 6.25 13.5M12 4.5a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold {{ $includeWash ? 'text-sky-700' : 'text-slate-500' }}">Cuci</p>
-                            <p class="text-[11px] {{ $includeWash ? 'text-sky-500' : 'text-slate-400' }}">
-                                {{ $includeWash ? 'Termasuk cuci bersih' : 'Tidak dicuci' }}
-                            </p>
-                        </div>
-                        {{-- Checkmark --}}
-                        @if ($includeWash)
-                            <svg class="size-4 text-sky-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                            </svg>
-                        @endif
+                <div class="grid grid-cols-3 gap-2 mt-1">
+                    @php $svcOpts = [
+                        'both' => ['Cuci + Setrika', 'bg-sky-500'],
+                        'wash' => ['Cuci Saja', 'bg-cyan-500'],
+                        'iron' => ['Setrika Saja', 'bg-amber-500'],
+                    ]; @endphp
+                    @foreach ($svcOpts as $val => [$label, $color])
+                    <label class="relative flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border cursor-pointer transition-all select-none text-center
+                                  {{ $serviceType === $val ? 'border-sky-400 bg-sky-50/70 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300' }}">
+                        <input type="radio" name="serviceType" value="{{ $val }}" wire:model.live="serviceType" class="sr-only">
+                        <span class="size-2.5 rounded-full {{ $serviceType === $val ? $color : 'bg-slate-300' }}"></span>
+                        <span class="text-[11px] font-bold leading-tight {{ $serviceType === $val ? 'text-sky-700' : 'text-slate-500' }}">{{ $label }}</span>
                     </label>
-
-                    {{-- Toggle: Setrika --}}
-                    <label class="relative flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none
-                                  {{ $includeIron ? 'border-amber-400 bg-amber-50/60' : 'border-slate-200 bg-white opacity-70' }}">
-                        <input type="checkbox" wire:model.live="includeIron" class="sr-only">
-                        {{-- Ikon Setrika --}}
-                        <div class="shrink-0 size-8 rounded-lg flex items-center justify-center
-                                    {{ $includeIron ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-400' }}">
-                            <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904m10.598-9.75H14.25M5.904 18.5c.083.205.173.405.27.602.197.4-.078.898-.523.898h-.908c-.889 0-1.713-.518-1.972-1.368a12 12 0 0 1-.521-3.507c0-1.553.295-3.036.831-4.398C3.387 9.953 4.167 9.5 5 9.5h1.053c.472 0 .745.556.5.96a8.958 8.958 0 0 0-1.302 4.665c0 1.194.232 2.333.654 3.375Z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold {{ $includeIron ? 'text-amber-700' : 'text-slate-500' }}">Setrika</p>
-                            <p class="text-[11px] {{ $includeIron ? 'text-amber-500' : 'text-slate-400' }}">
-                                {{ $includeIron ? 'Termasuk disetrika' : 'Tidak disetrika' }}
-                            </p>
-                        </div>
-                        {{-- Checkmark --}}
-                        @if ($includeIron)
-                            <svg class="size-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                            </svg>
-                        @endif
-                    </label>
+                    @endforeach
                 </div>
-
-                {{-- Peringatan jika kedua toggle off --}}
-                @if (!$includeWash && !$includeIron)
-                    <p class="mt-2 text-xs text-rose-600 flex items-center gap-1.5">
-                        <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
-                        Pilih minimal satu layanan (Cuci atau Setrika).
-                    </p>
-                @endif
             </div>
             <div>
                 <label class="form-label">Catatan Khusus (opsional)</label>
@@ -284,13 +240,12 @@
                     <span class="font-semibold text-slate-800 text-right">{{ $preview['package_name'] }}</span>
                 </div>
                 @php
-                    $svcType = $includeWash && $includeIron ? 'Cuci + Setrika'
-                             : ($includeWash ? 'Cuci Saja'
-                             : ($includeIron ? 'Setrika Saja' : 'Custom'));
+                    $svcLabels = ['both' => 'Cuci + Setrika', 'wash' => 'Cuci Saja', 'iron' => 'Setrika Saja'];
+                    $svcType = $svcLabels[$serviceType] ?? 'Custom';
                 @endphp
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-500">Jenis</span>
-                    <span class="font-semibold {{ ($includeWash && $includeIron) ? 'text-slate-600' : 'text-sky-600' }}">{{ $svcType }}</span>
+                    <span class="font-semibold {{ $serviceType === 'both' ? 'text-slate-600' : 'text-sky-600' }}">{{ $svcType }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-500">Berat/Qty</span>
@@ -311,7 +266,7 @@
             <div class="rounded-xl bg-slate-50 border border-slate-200/80 p-3">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">Auto-Deduct Bahan Baku</p>
                 <div class="space-y-1.5">
-                    @if ($includeWash)
+                    @if ($serviceType !== 'iron')
                     <div class="flex items-center gap-2">
                         <div class="size-2 rounded-full bg-sky-400 shrink-0"></div>
                         <span class="text-xs text-slate-600 flex-1">Deterjen</span>

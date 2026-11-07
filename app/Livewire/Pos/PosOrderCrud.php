@@ -31,8 +31,7 @@ class PosOrderCrud extends Component
     public ?int   $selectedPackageId  = null;
     public float  $quantity           = 1.0;
     public string $perfumeVariant     = 'Sakura';
-    public bool   $includeWash        = true;
-    public bool   $includeIron        = true;
+    public string $serviceType        = 'both'; // 'both' | 'wash' | 'iron'
     public string $paymentStatus      = 'BELUM_LUNAS';
     public string $paymentMethod      = 'TUNAI';
     public string $notes              = '';
@@ -122,10 +121,13 @@ class PosOrderCrud extends Component
         $qty        = max(0.1, $this->quantity);
         $totalPrice = (int) round($pkg->price_per_unit * $qty);
 
-        $detId = $this->includeWash
+        // Cuci termasuk untuk 'both' dan 'wash'; dilewati untuk 'iron' (Setrika Saja)
+        $incWash = $this->serviceType !== 'iron';
+
+        $detId = $incWash
             ? InventoryItem::where('category', 'CHEMICAL')->where('name', 'like', '%Deterjen%')->value('id')
             : null;
-        $sofId = $this->includeWash
+        $sofId = $incWash
             ? InventoryItem::where('category', 'CHEMICAL')->where('name', 'like', '%Softener%')->value('id')
             : null;
 
@@ -135,9 +137,9 @@ class PosOrderCrud extends Component
             'price_per_unit' => $pkg->price_per_unit,
             'quantity'       => $qty,
             'total_price'    => $totalPrice,
-            // BOM preview — deterjen/softener hanya tampil jika include_wash
-            'detergent_ml'   => $this->includeWash ? round((float) $pkg->detergent_ml_per_unit * $qty, 1) : 0,
-            'softener_ml'    => $this->includeWash ? round((float) $pkg->softener_ml_per_unit  * $qty, 1) : 0,
+            // BOM preview — deterjen/softener hanya tampil jika ada proses cuci
+            'detergent_ml'   => $incWash ? round((float) $pkg->detergent_ml_per_unit * $qty, 1) : 0,
+            'softener_ml'    => $incWash ? round((float) $pkg->softener_ml_per_unit  * $qty, 1) : 0,
             'perfume_ml'     => round((float) $pkg->perfume_ml_per_unit * $qty, 1),
             'detergent_id'   => $detId,
             'softener_id'    => $sofId,
@@ -239,11 +241,12 @@ class PosOrderCrud extends Component
     {
         $this->selectedPackageId = $id;
 
-        // Auto-fill include_wash / include_iron dari default paket
+        // Auto-fill jenis layanan dari default paket
         $pkg = ServicePackage::find($id);
         if ($pkg) {
-            $this->includeWash = (bool) ($pkg->default_include_wash ?? true);
-            $this->includeIron = (bool) ($pkg->default_include_iron ?? true);
+            $w = (bool) ($pkg->default_include_wash ?? true);
+            $i = (bool) ($pkg->default_include_iron ?? true);
+            $this->serviceType = $w && $i ? 'both' : ($w ? 'wash' : ($i ? 'iron' : 'both'));
         }
 
         unset($this->selectedPackage, $this->orderPreview);
@@ -258,23 +261,15 @@ class PosOrderCrud extends Component
             'selectedPackageId'  => ['required', 'integer', 'exists:service_packages,id'],
             'quantity'           => ['required', 'numeric', 'min:0.1'],
             'perfumeVariant'     => ['required', 'string'],
+            'serviceType'        => ['required', Rule::in(['both', 'wash', 'iron'])],
             'paymentStatus'      => ['required', Rule::in(['LUNAS', 'BELUM_LUNAS'])],
             'paymentMethod'      => ['required', Rule::in(['TUNAI', 'QRIS', 'TRANSFER', 'DEPOSIT_KG'])],
         ], [], [
             'selectedCustomerId' => 'Pelanggan',
             'selectedPackageId'  => 'Paket layanan',
             'quantity'           => 'Berat/jumlah',
+            'serviceType'        => 'Jenis layanan',
         ]);
-
-        // Minimal salah satu layanan (Cuci / Setrika) harus aktif
-        if (! $this->includeWash && ! $this->includeIron) {
-            $this->dispatch('notify', [
-                'type'    => 'error',
-                'title'   => 'Layanan kosong',
-                'message' => 'Pilih minimal Cuci atau Setrika.',
-            ]);
-            return;
-        }
 
         try {
             $perfumeItem = $this->selectedPerfumeItem;
@@ -285,8 +280,8 @@ class PosOrderCrud extends Component
                 'service_package_id' => $this->selectedPackageId,
                 'quantity'           => $this->quantity,
                 'perfume_variant'    => $this->perfumeVariant,
-                'include_wash'       => $this->includeWash,
-                'include_iron'       => $this->includeIron,
+                'include_wash'       => $this->serviceType !== 'iron',
+                'include_iron'       => $this->serviceType !== 'wash',
                 'notes'              => $this->notes,
                 'payment_status'     => $this->paymentStatus,
                 'payment_method'     => $this->paymentMethod,
@@ -321,8 +316,7 @@ class PosOrderCrud extends Component
         $this->selectedPackageId   = null;
         $this->quantity            = 1.0;
         $this->perfumeVariant      = 'Sakura';
-        $this->includeWash         = true;
-        $this->includeIron         = true;
+        $this->serviceType         = 'both';
         $this->paymentStatus       = 'BELUM_LUNAS';
         $this->paymentMethod       = 'TUNAI';
         $this->notes               = '';

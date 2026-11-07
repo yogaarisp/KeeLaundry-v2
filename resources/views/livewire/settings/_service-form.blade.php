@@ -63,13 +63,16 @@
         </div>
     </div>
 
-    {{-- BOM Resep Sabun --}}
+    {{-- BOM Resep Bahan (sabun hanya jika default cuci on) --}}
     <div class="rounded-2xl border border-sky-100 bg-sky-50/60 p-3.5 space-y-3">
         <div class="flex items-center gap-2">
             <svg class="size-4 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
-            <p class="text-xs font-bold text-sky-800 uppercase tracking-wide">Resep BOM Sabun (ml per {{ $unit }})</p>
+            <p class="text-xs font-bold text-sky-800 uppercase tracking-wide">
+                {{ $default_include_wash ? "Resep BOM Sabun (ml per {$unit})" : "Resep Bahan (ml per {$unit})" }}
+            </p>
         </div>
 
+        @if ($default_include_wash)
         <div class="grid grid-cols-3 gap-2.5">
             <div>
                 <label class="form-label text-[11px] font-bold text-sky-700 mb-1">Deterjen</label>
@@ -96,13 +99,32 @@
                 @error('perfume_ml') <p class="form-error text-[10px] mt-0.5">{{ $message }}</p> @enderror
             </div>
         </div>
+        @else
+        <p class="text-[11px] text-slate-500 -mt-1">Paket Setrika Saja tidak memakai deterjen/softener — hanya parfum yang dipotong saat order dibuat.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div>
+                <label class="form-label text-[11px] font-bold text-purple-700 mb-1">Parfum</label>
+                <div class="relative">
+                    <input type="number" step="0.5" wire:model.live="perfume_ml" class="form-input text-center pr-7 text-sm font-bold h-10">
+                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 font-semibold pointer-events-none">ml</span>
+                </div>
+                @error('perfume_ml') <p class="form-error text-[10px] mt-0.5">{{ $message }}</p> @enderror
+            </div>
+        </div>
+        @endif
 
         {{-- BOM Preview Pill --}}
         <div class="flex items-center gap-2 text-xs text-sky-800 bg-white/90 border border-sky-200/70 rounded-xl px-3 py-2 font-medium shadow-2xs">
             <svg class="size-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
+            @if ($default_include_wash)
             <span class="truncate">
                 Total: <strong>{{ $this->bomPreview['total_ml'] }} ml / {{ $unit }}</strong> (Det {{ $this->bomPreview['deterjen_ml'] }} + Sof {{ $this->bomPreview['softener_ml'] }} + Par {{ $this->bomPreview['parfum_ml'] }})
             </span>
+            @else
+            <span class="truncate">
+                Parfum: <strong>{{ $this->bomPreview['parfum_ml'] }} ml / {{ $unit }}</strong>
+            </span>
+            @endif
         </div>
     </div>
 
