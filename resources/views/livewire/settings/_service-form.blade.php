@@ -106,6 +106,43 @@
         </div>
     </div>
 
+    {{-- Default Layanan: pre-fill Cuci/Setrika di POS --}}
+    <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-3.5 space-y-2.5">
+        <div class="flex items-center gap-2">
+            <svg class="size-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.241.437-.613.43-.992a7.723 7.723 0 0 1 0-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+            <p class="text-xs font-bold text-slate-700 uppercase tracking-wide">Default Layanan di POS</p>
+        </div>
+        <p class="text-[11px] text-slate-400 -mt-1">Saat paket ini dipilih kasir, toggle Cuci/Setrika otomatis terisi sesuai di bawah.</p>
+        <div class="grid grid-cols-2 gap-2.5">
+            {{-- Default Cuci --}}
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all select-none
+                          {{ $default_include_wash ? 'border-sky-400 bg-sky-50/70' : 'border-slate-200 bg-white' }}">
+                <input type="checkbox" wire:model.live="default_include_wash" class="sr-only">
+                <div class="shrink-0 size-7 rounded-lg flex items-center justify-center
+                            {{ $default_include_wash ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-400' }}">
+                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5c0-1.657 3.134-3 7-3s7 1.343 7 3m0 0v4.5A2.25 2.25 0 0 1 15.5 20h-7a2.25 2.25 0 0 1-2.25-2.25V13.5"/></svg>
+                </div>
+                <span class="text-xs font-bold {{ $default_include_wash ? 'text-sky-700' : 'text-slate-500' }}">Cuci</span>
+            </label>
+            {{-- Default Setrika --}}
+            <label class="flex items-center gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all select-none
+                          {{ $default_include_iron ? 'border-amber-400 bg-amber-50/70' : 'border-slate-200 bg-white' }}">
+                <input type="checkbox" wire:model.live="default_include_iron" class="sr-only">
+                <div class="shrink-0 size-7 rounded-lg flex items-center justify-center
+                            {{ $default_include_iron ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-400' }}">
+                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.25c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 0 1 2.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 0 0 .322-1.672V2.75a.75.75 0 0 1 .75-.75 2.25 2.25 0 0 1 2.25 2.25c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282m0 0h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 0 1-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 0 0-1.423-.23H5.904"/></svg>
+                </div>
+                <span class="text-xs font-bold {{ $default_include_iron ? 'text-amber-700' : 'text-slate-500' }}">Setrika</span>
+            </label>
+        </div>
+        @if (! $default_include_wash && ! $default_include_iron)
+            <p class="text-[11px] text-rose-600 flex items-center gap-1">
+                <svg class="size-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/></svg>
+                Default minimal satu layanan harus aktif.
+            </p>
+        @endif
+    </div>
+
     {{-- Status toggle --}}
     <div class="flex items-center justify-between py-2 border-t border-slate-100">
         <div>

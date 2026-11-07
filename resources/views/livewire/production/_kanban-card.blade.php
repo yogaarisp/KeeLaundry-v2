@@ -8,13 +8,9 @@ $statusColorMap = [
 ];
 $cfg = $statusColorMap[$order->status] ?? $statusColorMap['ANTREAN'];
 
-$nextStatus = match($order->status) {
-    'ANTREAN'  => 'CUCI',
-    'CUCI'     => 'SETRIKA',
-    'SETRIKA'  => 'PACKING',
-    'PACKING'  => 'SIAP_DIAMBIL',
-    default    => null,
-};
+// Gunakan helper model agar skip CUCI/SETRIKA otomatis sesuai
+// include_wash / include_iron (Cuci Saja / Setrika Saja).
+$nextStatus = $order->nextProductionStatus();
 
 $nextLabel = match($nextStatus) {
     'CUCI'         => 'Mulai Cuci',
@@ -65,11 +61,20 @@ $nextLabel = match($nextStatus) {
         <span class="truncate font-medium">{{ $order->servicePackage?->name }}</span>
     </div>
 
-    {{-- Parfum + Rack badges --}}
+    {{-- Parfum + Rack + Service-type badges --}}
     <div class="flex flex-wrap gap-1">
         <span class="badge badge-slate text-[10px]">🌸 {{ $order->perfume_variant }}</span>
         @if ($order->rack_location)
         <span class="badge badge-sky text-[10px] font-semibold">📦 {{ $order->rack_location }}</span>
+        @endif
+        {{-- Jenis layanan: tampilkan badge hanya jika bukan default (Cuci+Setrika) --}}
+        @php $svcLabel = $order->serviceSummaryLabel(); @endphp
+        @if ($order->include_wash && !$order->include_iron)
+            <span class="badge badge-sky text-[10px] font-semibold" title="Cuci saja — tanpa setrika">🧼 Cuci Saja</span>
+        @elseif (!$order->include_wash && $order->include_iron)
+            <span class="badge badge-amber text-[10px] font-semibold" title="Setrika saja — tanpa cuci">♨️ Setrika Saja</span>
+        @elseif (!$order->include_wash && !$order->include_iron)
+            <span class="badge badge-rose text-[10px] font-semibold" title="Tidak ada layanan cuci/setrika">⚠️ Custom</span>
         @endif
     </div>
 

@@ -19,6 +19,8 @@ class Order extends Model
         'quantity',
         'unit',
         'perfume_variant',
+        'include_wash',
+        'include_iron',
         'notes',
         'status',
         'rack_location',
@@ -31,8 +33,10 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'quantity'    => 'decimal:2',
-        'total_price' => 'integer',
+        'quantity'     => 'decimal:2',
+        'total_price'  => 'integer',
+        'include_wash' => 'boolean',
+        'include_iron' => 'boolean',
     ];
 
     // ─── Status Constants ──────────────────────────────────────────
@@ -87,6 +91,44 @@ class Order extends Model
     }
 
     // ─── Helpers ───────────────────────────────────────────────────
+
+    /**
+     * Tentukan status produksi berikutnya berdasarkan include_wash / include_iron.
+     *
+     * Contoh:
+     *   - Cuci+Setrika : ANTREAN → CUCI → SETRIKA → PACKING → SIAP_DIAMBIL
+     *   - Cuci saja    : ANTREAN → CUCI → PACKING → SIAP_DIAMBIL  (skip SETRIKA)
+     *   - Setrika saja : ANTREAN → SETRIKA → PACKING → SIAP_DIAMBIL (skip CUCI)
+     *
+     * @return string|null Status berikutnya, atau null jika sudah di akhir
+     */
+    public function nextProductionStatus(): ?string
+    {
+        return match ($this->status) {
+            self::STATUS_ANTREAN => $this->include_wash ? self::STATUS_CUCI : self::STATUS_SETRIKA,
+            self::STATUS_CUCI    => $this->include_iron ? self::STATUS_SETRIKA : self::STATUS_PACKING,
+            self::STATUS_SETRIKA => self::STATUS_PACKING,
+            self::STATUS_PACKING => self::STATUS_SIAP_DIAMBIL,
+            default              => null,
+        };
+    }
+
+    /**
+     * Label ringkas jenis layanan berdasarkan flag.
+     */
+    public function serviceSummaryLabel(): string
+    {
+        if ($this->include_wash && $this->include_iron) {
+            return 'Cuci + Setrika';
+        }
+        if ($this->include_wash) {
+            return 'Cuci Saja';
+        }
+        if ($this->include_iron) {
+            return 'Setrika Saja';
+        }
+        return 'Custom';
+    }
 
     /**
      * Cek apakah order ini sudah diklaim di tahap produksi mana pun.

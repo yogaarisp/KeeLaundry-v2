@@ -22,6 +22,8 @@ class ServicePackage extends Model
         'detergent_ml_per_unit',
         'softener_ml_per_unit',
         'perfume_ml_per_unit',
+        'default_include_wash',
+        'default_include_iron',
         'is_active',
     ];
 
@@ -31,6 +33,8 @@ class ServicePackage extends Model
         'detergent_ml_per_unit' => 'decimal:2',
         'softener_ml_per_unit'  => 'decimal:2',
         'perfume_ml_per_unit'   => 'decimal:2',
+        'default_include_wash'  => 'boolean',
+        'default_include_iron'  => 'boolean',
         'is_active'             => 'boolean',
     ];
 

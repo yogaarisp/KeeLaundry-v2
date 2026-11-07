@@ -17,7 +17,7 @@ class LaundryOrderService
      * CREATE ORDER
      * ─────────────────────────────────────────────────────────────
      * 1. Hitung total harga.
-     * 2. Potong stok deterjen, softener, dan parfum sesuai BOM.
+     * 2. Potong stok bahan baku sesuai BOM (dikondisikan oleh include_wash/include_iron).
      * 3. Catat StockMutation untuk setiap bahan.
      * 4. Kurangi deposit_kg pelanggan jika metode DEPOSIT_KG.
      * 5. Update last_order_date pelanggan.
@@ -27,6 +27,8 @@ class LaundryOrderService
      *   service_package_id: int,
      *   quantity: float,
      *   perfume_variant: string,
+     *   include_wash?: bool,
+     *   include_iron?: bool,
      *   notes?: string,
      *   payment_status: string,
      *   payment_method: string,
@@ -39,11 +41,18 @@ class LaundryOrderService
     {
         return DB::transaction(function () use ($data) {
             /** @var ServicePackage $package */
-            $package  = ServicePackage::findOrFail($data['service_package_id']);
-            $quantity = (float) $data['quantity'];
+            $package     = ServicePackage::findOrFail($data['service_package_id']);
+            $quantity    = (float) $data['quantity'];
+            $includeWash = (bool) ($data['include_wash'] ?? true);
+            $includeIron = (bool) ($data['include_iron'] ?? true);
 
             // Hitung harga total
             $totalPrice = (int) round($package->price_per_unit * $quantity);
+
+            // Semua order dimulai dari ANTREAN. Skip tahap CUCI/SETRIKA
+            // dihandle oleh Order::nextProductionStatus() di Kanban, bukan
+            // di sini, agar timeline tetap konsisten dan PIC bisa dicatat.
+            $initialStatus = Order::STATUS_ANTREAN;
 
             // Buat order
             $order = Order::create([
@@ -53,21 +62,25 @@ class LaundryOrderService
                 'quantity'           => $quantity,
                 'unit'               => $package->unit,
                 'perfume_variant'    => $data['perfume_variant'],
+                'include_wash'       => $includeWash,
+                'include_iron'       => $includeIron,
                 'notes'              => $data['notes'] ?? null,
-                'status'             => Order::STATUS_ANTREAN,
+                'status'             => $initialStatus,
                 'payment_status'     => $data['payment_status'],
                 'payment_method'     => $data['payment_method'],
                 'total_price'        => $totalPrice,
             ]);
 
             // Auto-deduct stok bahan baku
+            // Deterjen & softener hanya dipotong jika include_wash = true
             $this->deductStock(
                 order: $order,
                 package: $package,
                 quantity: $quantity,
-                detergentItemId: $data['detergent_item_id'] ?? null,
-                softenerItemId: $data['softener_item_id'] ?? null,
-                perfumeItemId: $data['perfume_item_id'] ?? null,
+                includeWash: $includeWash,
+                detergentItemId: $includeWash ? ($data['detergent_item_id'] ?? null) : null,
+                softenerItemId:  $includeWash ? ($data['softener_item_id']  ?? null) : null,
+                perfumeItemId:   $data['perfume_item_id'] ?? null,
             );
 
             // Kurangi deposit Kg jika bayar pakai deposit
@@ -286,20 +299,23 @@ class LaundryOrderService
 
     /**
      * Potong stok sistem bahan baku sesuai formula BOM.
-     * Hanya memotong item yang ID-nya disuplai (tidak null).
+     * Deterjen & softener hanya dipotong jika includeWash = true.
      */
     private function deductStock(
         Order $order,
         ServicePackage $package,
         float $quantity,
-        ?int $detergentItemId,
-        ?int $softenerItemId,
-        ?int $perfumeItemId,
+        bool $includeWash = true,
+        ?int $detergentItemId = null,
+        ?int $softenerItemId = null,
+        ?int $perfumeItemId = null,
     ): void {
         $mutations = [
-            [$detergentItemId, (float) $package->detergent_ml_per_unit * $quantity, 'Deterjen'],
-            [$softenerItemId,  (float) $package->softener_ml_per_unit  * $quantity, 'Softener'],
-            [$perfumeItemId,   (float) $package->perfume_ml_per_unit   * $quantity, 'Parfum'],
+            // Deterjen & softener: hanya jika proses cuci dilakukan
+            [$includeWash ? $detergentItemId : null, (float) $package->detergent_ml_per_unit * $quantity, 'Deterjen'],
+            [$includeWash ? $softenerItemId  : null, (float) $package->softener_ml_per_unit  * $quantity, 'Softener'],
+            // Parfum: selalu dipotong (dipakai saat packing, terlepas dari cuci/setrika)
+            [$perfumeItemId, (float) $package->perfume_ml_per_unit * $quantity, 'Parfum'],
         ];
 
         foreach ($mutations as [$itemId, $amount, $label]) {

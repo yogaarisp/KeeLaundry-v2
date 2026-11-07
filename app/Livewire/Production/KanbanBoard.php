@@ -202,19 +202,14 @@ class KanbanBoard extends Component
         }
     }
 
-    // ── Quick advance without drawer (ANTREAN → CUCI, etc.) ───────
+    // ── Quick advance without drawer — pakai nextProductionStatus() ─
 
     public function quickAdvance(int $orderId): void
     {
         $order = Order::withoutGlobalScope('branch')->findOrFail($orderId);
 
-        $next = match ($order->status) {
-            'ANTREAN'      => 'CUCI',
-            'CUCI'         => 'SETRIKA',
-            'SETRIKA'      => 'PACKING',
-            'PACKING'      => 'SIAP_DIAMBIL',
-            default        => null,
-        };
+        // Gunakan helper di model agar skip CUCI/SETRIKA otomatis
+        $next = $order->nextProductionStatus();
 
         if (! $next) {
             return;

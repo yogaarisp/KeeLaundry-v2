@@ -31,6 +31,8 @@ class BranchServiceCrud extends Component
     public float   $softener_ml      = 10.00;
     public float   $perfume_ml       = 5.00;
     public bool    $is_active        = true;
+    public bool    $default_include_wash = true;
+    public bool    $default_include_iron = true;
 
     // ─── Delete confirm ─────────────────────────────────────────
     public ?int    $deletingId       = null;
@@ -153,6 +155,8 @@ class BranchServiceCrud extends Component
         $this->softener_ml     = (float) $pkg->softener_ml_per_unit;
         $this->perfume_ml      = (float) $pkg->perfume_ml_per_unit;
         $this->is_active       = (bool) $pkg->is_active;
+        $this->default_include_wash = (bool) ($pkg->default_include_wash ?? true);
+        $this->default_include_iron = (bool) ($pkg->default_include_iron ?? true);
 
         $this->showCategoryModal = false;
         $this->showForm        = true;
@@ -180,6 +184,8 @@ class BranchServiceCrud extends Component
                 'detergent_ml_per_unit' => $this->detergent_ml,
                 'softener_ml_per_unit'  => $this->softener_ml,
                 'perfume_ml_per_unit'   => $this->perfume_ml,
+                'default_include_wash'  => $this->default_include_wash,
+                'default_include_iron'  => $this->default_include_iron,
                 'is_active'             => $this->is_active,
             ];
 
@@ -260,6 +266,8 @@ class BranchServiceCrud extends Component
         $this->softener_ml     = 10.00;
         $this->perfume_ml      = 5.00;
         $this->is_active       = true;
+        $this->default_include_wash = true;
+        $this->default_include_iron = true;
         $this->resetValidation();
     }
 
